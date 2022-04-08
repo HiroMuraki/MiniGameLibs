@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace HM.MiniGames.Minesweeper {
+namespace HM.MiniGames {
     /// <summary>
     /// 二维坐标网格
     /// </summary>
@@ -12,7 +12,7 @@ namespace HM.MiniGames.Minesweeper {
             }
             set {
                 if (_locked) {
-                    throw new InvalidOperationException("Grid  locked, unable to modify");
+                    throw new InvalidOperationException("Grid locked, unable to modify");
                 }
                 _objects[coord.Y, coord.X] = value;
             }

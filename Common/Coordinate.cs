@@ -1,4 +1,4 @@
-namespace HM.MiniGames.Minesweeper {
+namespace HM.MiniGames {
     [Serializable]
     public readonly struct Coordinate : IEquatable<Coordinate> {
         /// <summary>
