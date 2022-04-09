@@ -148,7 +148,7 @@ namespace HM.MiniGames.Minesweeper {
         }
         private void CheckCoordinate(Coordinate coord) {
             if (coord.X < 0 || coord.X >= _layoutHelper.ColumnSize || coord.Y < 0 || coord.Y >= _layoutHelper.RowSize) {
-                throw new InvalidCoordinateException(coord);
+                throw new CoordinateOutOfRangeException(coord);
             }
         }
         private void OnLayoutUpdated() {

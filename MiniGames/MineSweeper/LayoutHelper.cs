@@ -107,7 +107,7 @@
                 (-1,  0),          (1,  0),
                 (-1,  1), (0,  1), (1,  1)
 #pragma warning restore format
-            };
+        };
         /// <summary>
         /// 计数指定坐标周围符合条件的方块
         /// </summary>
