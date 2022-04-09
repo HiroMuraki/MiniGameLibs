@@ -1,6 +1,6 @@
 namespace HM.MiniGames {
     [Serializable]
-    public readonly struct Coordinate : IEquatable<Coordinate> {
+    public readonly struct Coordinate : IEquatable<Coordinate>, IFormattable {
         /// <summary>
         /// 获取该坐标的正上方坐标
         /// </summary>
@@ -93,6 +93,9 @@ namespace HM.MiniGames {
         }
         public override string ToString() {
             return $"({X}, {Y})";
+        }
+        public string ToString(string? format, IFormatProvider? formatProvider) {
+            return $"({X.ToString(format, formatProvider)}, {Y.ToString(format, formatProvider)})";
         }
     }
 }
