@@ -63,6 +63,9 @@ namespace HM.MiniGames {
         public static Coordinate operator *(Coordinate a, int b) {
             return new Coordinate(a.X * b, a.Y * b);
         }
+        public static Coordinate operator *(int a, Coordinate b) {
+            return b * a;
+        }
         public static Coordinate operator /(Coordinate a, int b) {
             return new Coordinate(a.X / b, a.Y / b);
         }
