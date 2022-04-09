@@ -45,10 +45,10 @@
         #endregion
 
         #region Static Methods
-        public LayoutHelper<TCell> Create(int rowSize, int columnSize, TCell initValue) {
+        public static LayoutHelper<TCell> Create(int rowSize, int columnSize, TCell initValue) {
             return new LayoutHelper<TCell>(rowSize, columnSize, initValue);
         }
-        public LayoutHelper<TCell> Create(int rowSize, int columnSize) {
+        public static LayoutHelper<TCell> Create(int rowSize, int columnSize) {
             return new LayoutHelper<TCell>(rowSize, columnSize, default!);
         }
         public static Coordinate[] GetCoordinates<T>(T[,] layout) {
