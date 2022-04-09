@@ -1,5 +1,9 @@
-﻿namespace HM.MiniGames {
-    public class LayoutHelper<TCell> {
+﻿using System.Text;
+
+namespace HM.MiniGames {
+    public sealed class LayoutHelper<TCell>
+        : IEquatable<LayoutHelper<TCell>>
+        where TCell : notnull, IEquatable<TCell> {
         #region Properties
         public TCell this[int x, int y] {
             get {
@@ -41,6 +45,57 @@
         }
         public bool IsValidCoordinate(Coordinate coord) {
             return IsValidCoordinate(Layout, coord);
+        }
+        public override string ToString() {
+            var sb = new StringBuilder(RowSize * ColumnSize);
+
+            for (int y = 0; y < RowSize; y++) {
+                for (int x = 0; x < ColumnSize; x++) {
+                    sb.Append(Layout[x, y]);
+                    if (x != ColumnSize - 1) {
+                        sb.Append(' ');
+                    }
+                }
+                sb.AppendLine();
+            }
+
+            return sb.ToString();
+        }
+        public override int GetHashCode() {
+            return RowSize ^ ColumnSize;
+        }
+        public override bool Equals(object? obj) {
+            if (ReferenceEquals(this, obj)) {
+                return true;
+            }
+            if (obj is null) {
+                return false;
+            }
+            if (obj.GetType() != typeof(LayoutHelper<TCell>)) {
+                return false;
+            }
+            return Equals((LayoutHelper<TCell>)obj);
+        }
+        public bool Equals(LayoutHelper<TCell>? other) {
+            if (ReferenceEquals(this, other)) {
+                return true;
+            }
+            if (other is null) {
+                return false;
+            }
+            if (RowSize != other.RowSize || ColumnSize != other.ColumnSize) {
+                return false;
+            }
+
+            for (int y = 0; y < RowSize; y++) {
+                for (int x = 0; x < ColumnSize; x++) {
+                    if (!Layout[y, x].Equals(other[y, x])) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
         #endregion
 
