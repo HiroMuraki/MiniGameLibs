@@ -50,7 +50,7 @@ namespace HM.MiniGames {
 
             for (int y = 0; y < RowSize; y++) {
                 for (int x = 0; x < ColumnSize; x++) {
-                    sb.Append(_layout[x, y]);
+                    sb.Append(_layout[y, x]);
                     if (x != ColumnSize - 1) {
                         sb.Append(' ');
                     }
