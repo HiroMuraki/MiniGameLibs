@@ -7,24 +7,23 @@ namespace HM.MiniGames {
         #region Properties
         public TCell this[int x, int y] {
             get {
-                return Layout[y, x];
+                return _layout[y, x];
             }
             set {
-                Layout[y, x] = value;
+                _layout[y, x] = value;
             }
         }
         public TCell this[Coordinate coord] {
             get {
-                return Layout[coord.Y, coord.X];
+                return _layout[coord.Y, coord.X];
             }
             set {
-                Layout[coord.Y, coord.X] = value;
+                _layout[coord.Y, coord.X] = value;
             }
         }
-        public TCell[,] Layout { get; }
-        public int RowSize => Layout.GetLength(0);
-        public int ColumnSize => Layout.GetLength(1);
-        public IEnumerable<Coordinate> Coordinates => GetCoordinates(Layout);
+        public int RowSize => _layout.GetLength(0);
+        public int ColumnSize => _layout.GetLength(1);
+        public IEnumerable<Coordinate> Coordinates => GetCoordinates(_layout);
         #endregion
 
         #region Methods
@@ -35,23 +34,23 @@ namespace HM.MiniGames {
             return TryFindCoordinates(predicate, out coord);
         }
         public Coordinate[] GetAroundCoordinates(Coordinate center) {
-            return GetAroundCoordinates(Layout, center);
+            return GetAroundCoordinates(_layout, center);
         }
         public void Shuffle() {
-            Shuffle(Layout);
+            Shuffle(_layout);
         }
         public void Shuffle(Coordinate[] fixedCoordinates) {
-            Shuffle(Layout, fixedCoordinates);
+            Shuffle(_layout, fixedCoordinates);
         }
         public bool IsValidCoordinate(Coordinate coord) {
-            return IsValidCoordinate(Layout, coord);
+            return IsValidCoordinate(_layout, coord);
         }
         public override string ToString() {
             var sb = new StringBuilder(RowSize * ColumnSize);
 
             for (int y = 0; y < RowSize; y++) {
                 for (int x = 0; x < ColumnSize; x++) {
-                    sb.Append(Layout[x, y]);
+                    sb.Append(_layout[x, y]);
                     if (x != ColumnSize - 1) {
                         sb.Append(' ');
                     }
@@ -89,7 +88,7 @@ namespace HM.MiniGames {
 
             for (int y = 0; y < RowSize; y++) {
                 for (int x = 0; x < ColumnSize; x++) {
-                    if (!Layout[y, x].Equals(other[y, x])) {
+                    if (!_layout[y, x].Equals(other[y, x])) {
                         return false;
                     }
                 }
@@ -148,11 +147,12 @@ namespace HM.MiniGames {
         #endregion
 
         #region Helpers
+        private readonly TCell[,] _layout;
         private LayoutHelper(int rowSize, int columnSize, TCell initValue) {
-            Layout = new TCell[rowSize, columnSize];
+            _layout = new TCell[rowSize, columnSize];
             for (int y = 0; y < rowSize; y++) {
                 for (int x = 0; x < columnSize; x++) {
-                    Layout[y, x] = initValue;
+                    _layout[y, x] = initValue;
                 }
             }
         }
