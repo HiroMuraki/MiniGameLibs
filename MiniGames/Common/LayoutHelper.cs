@@ -48,7 +48,7 @@ namespace HM.MiniGames {
         public override string ToString() {
             var sb = new StringBuilder(RowSize * ColumnSize);
 
-            for (int y = 0; y < RowSize; y++) {
+            for (int y = RowSize - 1; y >= 0; y--) {
                 for (int x = 0; x < ColumnSize; x++) {
                     sb.Append(_layout[y, x]);
                     if (x != ColumnSize - 1) {
