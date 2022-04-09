@@ -5,10 +5,13 @@ namespace HM.MiniGames.Minesweeper {
         #region Events
         public event EventHandler<LayoutUpdatedEventArgs>? LayoutUpdated;
         public event EventHandler<BlockActedEventArgs>? BlockActed;
+        public event EventHandler<GameStageChangedEventArgs>? GameStageChanged;
         #endregion
 
         #region Properties
-        public GameLayout Layout { get; private set; } = GameLayout.Create(0, 0, 0);
+        public int RowSize => _layoutHelper.RowSize;
+        public int ColumnSize => _layoutHelper.ColumnSize;
+        public int MineCount => _layoutHelper.MineCount;
         public Grid<IBlock> Blocks { get; set; } = Grid<IBlock>.Create(0, 0);
         public bool Started { get; private set; }
         #endregion
@@ -20,25 +23,28 @@ namespace HM.MiniGames.Minesweeper {
             }
 
             Started = false;
-            Layout = GameLayout.Create(rowSize, columnSize, mineCount);
-            Blocks = Grid<IBlock>.Create(Layout.RowSize, Layout.ColumnSize);
-            foreach (var coord in Layout.Coordinates) {
+            _layoutHelper = LayoutHelper.Create(rowSize, columnSize, mineCount);
+            Blocks = Grid<IBlock>.Create(_layoutHelper.RowSize, _layoutHelper.ColumnSize);
+            foreach (var coord in _layoutHelper.Coordinates) {
                 Blocks[coord] = _blockGenerator.Create();
                 Blocks[coord].Coordinate = coord;
             }
+            OnGameStageChanged(GameStage.Prepared);
             return this;
         }
         public GameMain Start(GameStartInfo gameInfo) {
             var protectedCoords = new List<Coordinate>();
             protectedCoords.Add(gameInfo.StartCoordinate);
-            protectedCoords.AddRange(Layout.GetAroundCoordinates(gameInfo.StartCoordinate));
-            Layout.Shuffle(protectedCoords.ToArray());
+            protectedCoords.AddRange(_layoutHelper.GetAroundCoordinates(gameInfo.StartCoordinate));
+            _layoutHelper.Shuffle(protectedCoords.ToArray());
             UpdateLayout();
             OnLayoutUpdated();
             Started = true;
+            OnGameStageChanged(GameStage.Started);
             return this;
         }
         public GameMain Pause() {
+            OnGameStageChanged(GameStage.Paused);
             return this;
         }
         public GameMain RestartGame() {
@@ -64,7 +70,7 @@ namespace HM.MiniGames.Minesweeper {
                 return this;
             }
             // 周围无雷，递归打开周围的方格
-            foreach (var aCoord in Layout.GetAroundCoordinates(coord)) {
+            foreach (var aCoord in _layoutHelper.GetAroundCoordinates(coord)) {
                 // 跳过已开或标记的方格
                 if (Blocks[aCoord].IsOpen || Blocks[aCoord].IsFlagged) {
                     continue;
@@ -120,10 +126,11 @@ namespace HM.MiniGames.Minesweeper {
         private GameMain() {
 
         }
+        private LayoutHelper _layoutHelper = LayoutHelper.Create(0, 0, 0);
         private IBlockGenerator _blockGenerator = new NoBlockGenerator();
         private int CountNearby(Coordinate coord, Predicate<IBlock> predicate) {
             int count = 0;
-            foreach (var aCoord in Layout.GetAroundCoordinates(coord)) {
+            foreach (var aCoord in _layoutHelper.GetAroundCoordinates(coord)) {
                 if (predicate(Blocks[aCoord])) {
                     count++;
                 }
@@ -131,20 +138,16 @@ namespace HM.MiniGames.Minesweeper {
             return count;
         }
         private void UpdateLayout() {
-            foreach (var coord in Layout.Coordinates) {
-                Blocks[coord].Type = Layout[coord] switch {
-                    0 => BlockType.Blank,
-                    1 => BlockType.Mine,
-                    _ => BlockType.Unknow,
-                };
+            foreach (var coord in _layoutHelper.Coordinates) {
+                Blocks[coord].Type = _layoutHelper[coord];
             }
 
-            foreach (var coord in Layout.Coordinates) {
+            foreach (var coord in _layoutHelper.Coordinates) {
                 Blocks[coord].NearbyMines = CountNearby(coord, c => c.Type == BlockType.Mine);
             }
         }
         private void CheckCoordinate(Coordinate coord) {
-            if (coord.X < 0 || coord.X >= Layout.ColumnSize || coord.Y < 0 || coord.Y >= Layout.RowSize) {
+            if (coord.X < 0 || coord.X >= _layoutHelper.ColumnSize || coord.Y < 0 || coord.Y >= _layoutHelper.RowSize) {
                 throw new InvalidCoordinateException(coord);
             }
         }
@@ -153,6 +156,9 @@ namespace HM.MiniGames.Minesweeper {
         }
         private void OnBlockActed(Coordinate coord, BlockAction action) {
             BlockActed?.Invoke(this, new BlockActedEventArgs(action, coord));
+        }
+        private void OnGameStageChanged(GameStage stage) {
+            GameStageChanged?.Invoke(this, new GameStageChangedEventArgs(stage));
         }
         #endregion
     }

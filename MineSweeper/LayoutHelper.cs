@@ -2,22 +2,19 @@
     /// <summary>
     /// 布局信息控制器
     /// </summary>
-    public class GameLayout {
-        public static readonly int BlankID = 0;
-        public static readonly int MineID = 1;
-
+    internal class LayoutHelper {
         #region Properties
-        public int this[Coordinate coord] {
+        internal BlockType this[Coordinate coord] {
             get {
                 return _layout[coord.Y, coord.X];
             }
         }
-        public int this[int x, int y] {
+        internal BlockType this[int x, int y] {
             get {
                 return _layout[y, x];
             }
         }
-        public IEnumerable<Coordinate> Coordinates {
+        internal IEnumerable<Coordinate> Coordinates {
             get {
                 for (int y = 0; y < RowSize; y++) {
                     for (int x = 0; x < ColumnSize; x++) {
@@ -26,9 +23,9 @@
                 }
             }
         }
-        public int RowSize => _layout.GetLength(0);
-        public int ColumnSize => _layout.GetLength(1);
-        public int MineCount { get; private set; }
+        internal int RowSize => _layout.GetLength(0);
+        internal int ColumnSize => _layout.GetLength(1);
+        internal int MineCount { get; private set; }
         #endregion
 
         #region Methods
@@ -39,18 +36,18 @@
         /// <param name="columnSize"></param>
         /// <param name="mineCount"></param>
         /// <returns></returns>
-        public static GameLayout Create(int rowSize, int columnSize, int mineCount) {
-            return new GameLayout(rowSize, columnSize, mineCount);
+        internal static LayoutHelper Create(int rowSize, int columnSize, int mineCount) {
+            return new LayoutHelper(rowSize, columnSize, mineCount);
         }
         /// <summary>
         /// 打乱布局信息
         /// </summary>
         /// <returns></returns>
-        public GameLayout Shuffle(Coordinate[] protectedCoords) {
+        internal LayoutHelper Shuffle(Coordinate[] protectedCoords) {
             Shuffle(_layout, protectedCoords);
             return this;
         }
-        public GameLayout Shuffle() {
+        internal LayoutHelper Shuffle() {
             Shuffle(_layout, Array.Empty<Coordinate>());
             return this;
         }
@@ -58,8 +55,8 @@
         /// 获取布局深复制副本
         /// </summary>
         /// <returns></returns>
-        public int[,] GetLayoutCopy() {
-            int[,] copy = new int[RowSize, ColumnSize];
+        internal BlockType[,] GetLayoutCopy() {
+            var copy = new BlockType[RowSize, ColumnSize];
             for (int y = 0; y < RowSize; y++) {
                 for (int x = 0; x < ColumnSize; x++) {
                     copy[y, x] = _layout[y, x];
@@ -72,7 +69,7 @@
         /// </summary>
         /// <param name="center"></param>
         /// <returns></returns>
-        public IEnumerable<Coordinate> GetAroundCoordinates(Coordinate center) {
+        internal IEnumerable<Coordinate> GetAroundCoordinates(Coordinate center) {
             foreach (var (x, y) in _aroundDelta) {
                 var coord = new Coordinate(center.X + x, center.Y + y);
                 if (IsValidCoordinate(coord.X, coord.Y)) {
@@ -85,7 +82,7 @@
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        public IEnumerable<Coordinate> GetCoordinates(Predicate<int> predicate) {
+        internal IEnumerable<Coordinate> GetCoordinates(Predicate<BlockType> predicate) {
             for (int y = 0; y < RowSize; y++) {
                 for (int x = 0; x < ColumnSize; x++) {
                     if (predicate(_layout[y, x])) {
@@ -96,15 +93,15 @@
         }
         #endregion
 
-        private GameLayout(int rowSize, int columnSize, int mineCount) {
-            _layout = GetLayout(rowSize, columnSize, mineCount);
+        private LayoutHelper(int rowSize, int columnSize, int mineCount) {
+            _layout = CreateLayout(rowSize, columnSize, mineCount);
             MineCount = mineCount;
         }
-        private readonly int[,] _layout;
+        private readonly BlockType[,] _layout;
         /// <summary>
         /// 指示四周八方块的相对坐标
         /// </summary>
-        private static readonly List<(int x, int y)> _aroundDelta = new() {
+        private static readonly List<Coordinate> _aroundDelta = new() {
 #pragma warning disable format
                 (-1, -1), (0, -1), (1, -1),
                 (-1,  0),          (1,  0),
@@ -118,7 +115,7 @@
         /// <param name="y"></param>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        private int CountNearby(int x, int y, Predicate<int> predicate) {
+        private int CountNearby(int x, int y, Predicate<BlockType> predicate) {
             int count = 0;
             foreach (var aCoord in GetAroundCoordinates(new Coordinate(x, y))) {
                 if (predicate(_layout[aCoord.Y, aCoord.X])) {
@@ -134,15 +131,15 @@
         /// <param name="columnSize">布局列数</param>
         /// <param name="mineCount">雷数</param>
         /// <returns>布局信息，其中以0标识空块，1标识雷</returns>
-        private static int[,] GetLayout(int rowSize, int columnSize, int mineCount) {
-            var layout = new int[rowSize, columnSize];
+        private static BlockType[,] CreateLayout(int rowSize, int columnSize, int mineCount) {
+            var layout = new BlockType[rowSize, columnSize];
             for (int y = 0; y < rowSize; y++) {
                 for (int x = 0; x < columnSize; x++) {
                     if (y * columnSize + x < mineCount) {
-                        layout[y, x] = MineID;
+                        layout[y, x] = BlockType.Mine;
                     }
                     else {
-                        layout[y, x] = BlankID;
+                        layout[y, x] = BlockType.Blank;
                     }
                 }
             }
@@ -152,7 +149,7 @@
         /// 打乱布局
         /// </summary>
         /// <param name="layout"></param>
-        private void Shuffle(int[,] layout, Coordinate[] protectedCoords) {
+        private void Shuffle(BlockType[,] layout, Coordinate[] protectedCoords) {
             var rnd = new Random();
 
             var allowedCoords = (from i in Coordinates
@@ -160,7 +157,7 @@
                                  select i).ToArray();
 
             var unsafeCoords = (from i in protectedCoords
-                                where layout[i.Y, i.X] == MineID
+                                where layout[i.Y, i.X] == BlockType.Mine
                                 select i).ToArray();
 
             // 打乱除了保护坐标外的其他坐标序列
@@ -174,16 +171,16 @@
             }
 
             foreach (var coord in unsafeCoords) {
-                layout[coord.Y, coord.X] = BlankID;
+                layout[coord.Y, coord.X] = BlockType.Blank;
             }
 
             var blankCoords = (from i in allowedCoords
-                               where layout[i.Y, i.X] == BlankID
+                               where layout[i.Y, i.X] == BlockType.Blank
                                select i).ToList();
 
             for (int i = 0; i < unsafeCoords.Length; i++) {
                 int next = rnd.Next(0, blankCoords.Count);
-                layout[blankCoords[next].Y, blankCoords[next].X] = MineID;
+                layout[blankCoords[next].Y, blankCoords[next].X] = BlockType.Mine;
                 blankCoords.RemoveAt(next);
             }
         }

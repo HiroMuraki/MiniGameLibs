@@ -42,6 +42,12 @@ namespace HM.MiniGames {
             Y = y;
         }
 
+        public static implicit operator Coordinate((int x, int y) coord) {
+            return new Coordinate(coord.x, coord.y);
+        }
+        public static implicit operator (int x, int y)(Coordinate coord) {
+            return (coord.X, coord.Y);
+        }
         public static bool operator ==(Coordinate a, Coordinate b) {
             return a.X == b.X && a.Y == b.Y;
         }
@@ -65,6 +71,10 @@ namespace HM.MiniGames {
         }
         public static float SqrDistance(Coordinate a, Coordinate b) {
             return (a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y);
+        }
+        public void Deconstruct(out int x, out int y) {
+            x = X;
+            y = Y;
         }
         public override bool Equals(object? obj) {
             if (obj is null) {
