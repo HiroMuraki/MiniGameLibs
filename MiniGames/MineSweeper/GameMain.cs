@@ -1,5 +1,3 @@
-using System.Linq;
-
 namespace HM.MiniGames.Minesweeper {
     public sealed class GameMain {
         #region Events
@@ -58,7 +56,7 @@ namespace HM.MiniGames.Minesweeper {
                 return this;
             }
             Blocks[coord].IsOpen = true;
-            OnBlockActed(Blocks[coord], coord, BlockAction.Open);
+            OnBlockActed(coord, BlockAction.Open);
             return this;
         }
         public GameMain OpenRecursively(Coordinate coord) {
@@ -83,7 +81,7 @@ namespace HM.MiniGames.Minesweeper {
                 return this;
             }
             Blocks[coord].IsOpen = false;
-            OnBlockActed(Blocks[coord], coord, BlockAction.Close);
+            OnBlockActed(coord, BlockAction.Close);
             return this;
         }
         public GameMain Flag(Coordinate coord) {
@@ -92,7 +90,7 @@ namespace HM.MiniGames.Minesweeper {
                 return this;
             }
             Blocks[coord].IsFlagged = true;
-            OnBlockActed(Blocks[coord], coord, BlockAction.Flagged);
+            OnBlockActed(coord, BlockAction.Flagged);
             return this;
         }
         public GameMain Unflag(Coordinate coord) {
@@ -101,7 +99,7 @@ namespace HM.MiniGames.Minesweeper {
                 return this;
             }
             Blocks[coord].IsFlagged = false;
-            OnBlockActed(Blocks[coord], coord, BlockAction.Unflagged);
+            OnBlockActed(coord, BlockAction.Unflagged);
             return this;
         }
         public bool IsGameCompleted() {
@@ -152,8 +150,8 @@ namespace HM.MiniGames.Minesweeper {
         private void OnLayoutUpdated() {
             LayoutUpdated?.Invoke(this, new LayoutUpdatedEventArgs());
         }
-        private void OnBlockActed(IBlock block, Coordinate coord, BlockAction action) {
-            BlockActed?.Invoke(this, new BlockActedEventArgs(block, action, coord));
+        private void OnBlockActed(Coordinate coord, BlockAction action) {
+            BlockActed?.Invoke(this, new BlockActedEventArgs(Blocks[coord], action, coord));
         }
         private void OnGameStageChanged(GameStage stage) {
             GameStageChanged?.Invoke(this, new GameStageChangedEventArgs(stage));

@@ -38,6 +38,100 @@ namespace HM.MiniGames {
             }
             return copy;
         }
+        internal static T[,] Shrink<T>(T[,] layout, Directions directions, int shrinkSize) {
+            int newRowSize = layout.GetLength(0);
+            int newColumnSize = layout.GetLength(1);
+            int offsetX = 0;
+            int offsetY = 0;
+
+            if ((directions & Directions.Up) == Directions.Up) {
+                offsetY += shrinkSize;
+                newRowSize -= shrinkSize;
+            }
+            if ((directions & Directions.Down) == Directions.Down) {
+                newRowSize -= shrinkSize;
+            }
+            if ((directions & Directions.Left) == Directions.Left) {
+                offsetX += shrinkSize;
+                newColumnSize -= shrinkSize;
+            }
+            if ((directions & Directions.Right) == Directions.Right) {
+                newColumnSize -= shrinkSize;
+            }
+
+            if (newRowSize <= 0 || newColumnSize <= 0) {
+                return new T[0, 0];
+            }
+
+            var newMArray = new T[newRowSize, newColumnSize];
+
+            for (int y = 0; y < newRowSize; y++) {
+                for (int x = 0; x < newColumnSize; x++) {
+                    newMArray[y, x] = layout[y + offsetY, x + offsetX];
+                }
+            }
+
+            return newMArray;
+        }
+        internal static T[,] Expand<T>(T[,] layout, Directions directions, int expandSize) {
+            int newRowSize = layout.GetLength(0);
+            int newColumnSize = layout.GetLength(1);
+            int offsetX = 0;
+            int offsetY = 0;
+
+            if ((directions & Directions.Up) == Directions.Up) {
+                offsetY += expandSize;
+                newRowSize += expandSize;
+            }
+            if ((directions & Directions.Down) == Directions.Down) {
+                newRowSize += expandSize;
+            }
+            if ((directions & Directions.Left) == Directions.Left) {
+                offsetX += expandSize;
+                newColumnSize += expandSize;
+            }
+            if ((directions & Directions.Right) == Directions.Right) {
+                newColumnSize += expandSize;
+            }
+
+            var newMArray = new T[newRowSize, newColumnSize];
+            if ((directions & Directions.Up) == Directions.Up) {
+                for (int y = 0; y < expandSize; y++) {
+                    for (int x = 0; x < newColumnSize; x++) {
+                        newMArray[y, x] = default!;
+                    }
+                }
+            }
+            if ((directions & Directions.Down) == Directions.Down) {
+                for (int y = 0; y < expandSize; y++) {
+                    for (int x = 0; x < newColumnSize; x++) {
+                        newMArray[newRowSize - 1 - y, x] = default!;
+                    }
+                }
+            }
+            if ((directions & Directions.Left) == Directions.Left) {
+                for (int x = 0; x < expandSize; x++) {
+                    for (int y = 0; y < newRowSize; y++) {
+                        newMArray[y, x] = default!;
+                    }
+                }
+            }
+            if ((directions & Directions.Right) == Directions.Right) {
+                for (int x = 0; x < expandSize; x++) {
+                    for (int y = 0; y < newRowSize; y++) {
+                        newMArray[y, newColumnSize - 1 - x] = default!;
+                    }
+                }
+            }
+
+            for (int y = 0; y < layout.GetLength(0); y++) {
+                for (int x = 0; x < layout.GetLength(1); x++) {
+                    newMArray[y + offsetY, x + offsetX] = layout[y, x];
+                }
+            }
+
+            return newMArray;
+        }
         internal static int CountIf<T>(T[,] layout, Predicate<T> predicate) {
             int count = 0;
             foreach (var coord in GetCoordinates(layout)) {

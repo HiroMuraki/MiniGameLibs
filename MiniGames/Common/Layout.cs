@@ -33,9 +33,6 @@ namespace HM.MiniGames {
         public T[,] To2DArray() {
             return LayoutHelper.GetDeepCopy(_layout);
         }
-        public Layout<T> GetDeepCopy() {
-            return new Layout<T>(LayoutHelper.GetDeepCopy(_layout));
-        }
         public int CountIf(Predicate<T> predicate) {
             return LayoutHelper.CountIf(_layout, predicate);
         }
@@ -48,26 +45,41 @@ namespace HM.MiniGames {
         public Coordinate[] GetAroundCoordinates(Coordinate center) {
             return LayoutHelper.GetAroundCoordinates(_layout, center);
         }
-        public void RandomAssign(T[] values) {
-            LayoutHelper.RandomAssign(_layout, values);
-        }
-        public void RandomAssign(T[] values, Coordinate[] fixedCoords) {
-            LayoutHelper.RandomAssign(_layout, values, fixedCoords);
-        }
-        public void RandomAssign(T value, int count) {
-            LayoutHelper.RandomAssign(_layout, value, count);
-        }
-        public void RandomAssign(T value, int count, Coordinate[] fixedCoords) {
-            LayoutHelper.RandomAssign(_layout, value, count, fixedCoords);
-        }
-        public void Shuffle() {
-            LayoutHelper.Shuffle(_layout);
-        }
-        public void Shuffle(Coordinate[] fixedCoords) {
-            LayoutHelper.Shuffle(_layout, fixedCoords);
-        }
         public bool IsValidCoordinate(Coordinate coord) {
             return LayoutHelper.IsValidCoordinate(_layout, coord);
+        }
+        public Layout<T> GetExpandedLayout(Directions directions, int expandSize) {
+            return new(LayoutHelper.Expand(_layout, directions, expandSize));
+        }
+        public Layout<T> GetShrinkedLayout(Directions directions, int expandSize) {
+            return new(LayoutHelper.Shrink(_layout, directions, expandSize));
+        }
+        public Layout<T> GetDeepCopy() {
+            return new(LayoutHelper.GetDeepCopy(_layout));
+        }
+        public Layout<T> RandomAssign(T[] values) {
+            LayoutHelper.RandomAssign(_layout, values);
+            return this;
+        }
+        public Layout<T> RandomAssign(T[] values, Coordinate[] fixedCoords) {
+            LayoutHelper.RandomAssign(_layout, values, fixedCoords);
+            return this;
+        }
+        public Layout<T> RandomAssign(T value, int count) {
+            LayoutHelper.RandomAssign(_layout, value, count);
+            return this;
+        }
+        public Layout<T> RandomAssign(T value, int count, Coordinate[] fixedCoords) {
+            LayoutHelper.RandomAssign(_layout, value, count, fixedCoords);
+            return this;
+        }
+        public Layout<T> Shuffle() {
+            LayoutHelper.Shuffle(_layout);
+            return this;
+        }
+        public Layout<T> Shuffle(Coordinate[] fixedCoords) {
+            LayoutHelper.Shuffle(_layout, fixedCoords);
+            return this;
         }
         public override string ToString() {
             var sb = new StringBuilder(RowSize * ColumnSize);
@@ -128,13 +140,13 @@ namespace HM.MiniGames {
 
         #region Static Methods
         public static Layout<T> Create(int rowSize, int columnSize, T initValue) {
-            return new Layout<T>(rowSize, columnSize, initValue);
+            return new(rowSize, columnSize, initValue);
         }
         public static Layout<T> Create(int rowSize, int columnSize) {
-            return new Layout<T>(rowSize, columnSize, default!);
+            return new(rowSize, columnSize, default!);
         }
         public static Layout<T> Create(T[,] layout) {
-            return new Layout<T>(layout);
+            return new(layout);
         }
         public static Layout<T> Create(T[] array, int rowSize, int columnSize) {
             return new(LayoutHelper.Create2DArraysFromArray(array, rowSize, columnSize));
