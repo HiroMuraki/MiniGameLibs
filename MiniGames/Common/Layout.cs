@@ -3,7 +3,7 @@
 namespace HM.MiniGames {
     public sealed class Layout<T>
         : IEquatable<Layout<T>>
-        where T : notnull, IComparable {
+        where T : notnull {
         #region Properties
         public T this[int x, int y] {
             get {
@@ -27,6 +27,9 @@ namespace HM.MiniGames {
         #endregion
 
         #region Methods
+        public T[] ToArray() {
+            return LayoutHelper.ToArray(_layout);
+        }
         public Layout<T> GetDeepCopy() {
             return new Layout<T>(LayoutHelper.GetDeepCopy(_layout));
         }
@@ -108,7 +111,7 @@ namespace HM.MiniGames {
             }
             for (int y = 0; y < RowSize; y++) {
                 for (int x = 0; x < ColumnSize; x++) {
-                    if (_layout[y, x].CompareTo(other._layout[y, x]) != 0) {
+                    if (!_layout[y, x].Equals(other._layout[y, x])) {
                         return false;
                     }
                 }
