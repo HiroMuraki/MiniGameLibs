@@ -11,7 +11,7 @@ namespace HM.MiniGames.Minesweeper {
 
         public int ContentID { get; set; }
         public Coordinate Coordinate { get; set; }
-        public BlockType Type { get; set; } = BlockType.Unknow;
+        public BlockType Type { get; set; } = BlockType.None;
         public int NearbyMines { get; set; }
         public bool IsOpen {
             get {
@@ -31,7 +31,7 @@ namespace HM.MiniGames.Minesweeper {
         }
 
         public void ResetStatus() {
-            Type = BlockType.Unknow;
+            Type = BlockType.None;
             NearbyMines = 0;
             _status = BlockStatus.Default;
         }

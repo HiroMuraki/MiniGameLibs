@@ -11,9 +11,8 @@ namespace HM.MiniGames.Minesweeper {
         #region Properties
         public int RowSize => _layoutHelper.RowSize;
         public int ColumnSize => _layoutHelper.ColumnSize;
-        public int MineCount => _layoutHelper.MineCount;
+        public int MineCount { get; private set; }
         public Grid<IBlock> Blocks { get; set; } = Grid<IBlock>.Create(0, 0);
-        public bool Started { get; private set; }
         #endregion
 
         #region Methods
@@ -22,8 +21,8 @@ namespace HM.MiniGames.Minesweeper {
                 throw new InvalidBlockGeneratorException();
             }
 
-            Started = false;
-            _layoutHelper = LayoutHelper.Create(rowSize, columnSize, mineCount);
+            MineCount = mineCount;
+            _layoutHelper = LayoutHelper<BlockType>.Create(rowSize, columnSize, BlockType.Blank);
             Blocks = Grid<IBlock>.Create(_layoutHelper.RowSize, _layoutHelper.ColumnSize);
             foreach (var coord in _layoutHelper.Coordinates) {
                 Blocks[coord] = _blockGenerator.Create();
@@ -33,13 +32,12 @@ namespace HM.MiniGames.Minesweeper {
             return this;
         }
         public GameMain Start(GameStartInfo gameInfo) {
-            var protectedCoords = new List<Coordinate>();
-            protectedCoords.Add(gameInfo.StartCoordinate);
-            protectedCoords.AddRange(_layoutHelper.GetAroundCoordinates(gameInfo.StartCoordinate));
-            _layoutHelper.Shuffle(protectedCoords.ToArray());
+            var fixedCoords = new List<Coordinate>();
+            fixedCoords.Add(gameInfo.StartCoordinate);
+            fixedCoords.AddRange(_layoutHelper.GetAroundCoordinates(gameInfo.StartCoordinate));
+            _layoutHelper.RandomAssign(BlockType.Mine, MineCount, fixedCoords.ToArray());
             UpdateLayout();
             OnLayoutUpdated();
-            Started = true;
             OnGameStageChanged(GameStage.Started);
             return this;
         }
@@ -126,7 +124,7 @@ namespace HM.MiniGames.Minesweeper {
         private GameMain() {
 
         }
-        private LayoutHelper _layoutHelper = LayoutHelper.Create(0, 0, 0);
+        private LayoutHelper<BlockType> _layoutHelper = LayoutHelper<BlockType>.Create(0, 0, BlockType.None);
         private IBlockGenerator _blockGenerator = new NoBlockGenerator();
         private int CountNearby(Coordinate coord, Predicate<IBlock> predicate) {
             int count = 0;

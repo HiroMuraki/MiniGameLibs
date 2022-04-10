@@ -49,7 +49,7 @@ namespace HM.MiniGames {
         public void Unlock() {
             _locked = false;
         }
-        public IEnumerable<Coordinate> GetCoordinates(Predicate<T> predicate) {
+        public IEnumerable<Coordinate> FindCoordinates(Predicate<T> predicate) {
             for (int x = 0; x < ColumnSize; x++) {
                 for (int y = 0; y < RowSize; y++) {
                     if (predicate(_objects[y, x])) {
@@ -58,8 +58,8 @@ namespace HM.MiniGames {
                 }
             }
         }
-        public bool TryGetCoordinates(Predicate<T> predicate, out Coordinate[] result) {
-            result = GetCoordinates(predicate).ToArray();
+        public bool TryFindCoordinates(Predicate<T> predicate, out Coordinate[] result) {
+            result = FindCoordinates(predicate).ToArray();
             return result.Length != 0;
         }
         public IEnumerator<T> GetEnumerator() {
