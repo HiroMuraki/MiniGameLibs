@@ -73,7 +73,7 @@ namespace HM.MiniGames {
                         sb.Append(' ');
                     }
                 }
-                if (y < RowSize - 1) {
+                if (y > 0) {
                     sb.AppendLine();
                 }
             }
@@ -124,7 +124,7 @@ namespace HM.MiniGames {
             var copy = new T[rowSize, columnSize];
             for (int y = 0; y < rowSize; y++) {
                 for (int x = 0; x < columnSize; x++) {
-                    copy[y, x] = layout[x, y];
+                    copy[y, x] = layout[y, x];
                 }
             }
             return copy;
