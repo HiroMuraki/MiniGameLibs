@@ -30,6 +30,9 @@ namespace HM.MiniGames {
         public T[] ToArray() {
             return LayoutHelper.ToArray(_layout);
         }
+        public T[,] To2DArray() {
+            return LayoutHelper.GetDeepCopy(_layout);
+        }
         public Layout<T> GetDeepCopy() {
             return new Layout<T>(LayoutHelper.GetDeepCopy(_layout));
         }
