@@ -22,7 +22,7 @@ namespace HM.MiniGames.Minesweeper {
             }
 
             MineCount = mineCount;
-            _layoutHelper = LayoutHelper<BlockType>.Create(rowSize, columnSize, BlockType.Blank);
+            _layoutHelper = Layout<BlockType>.Create(rowSize, columnSize, BlockType.Blank);
             Blocks = Grid<IBlock>.Create(_layoutHelper.RowSize, _layoutHelper.ColumnSize);
             foreach (var coord in _layoutHelper.Coordinates) {
                 Blocks[coord] = _blockGenerator.Create();
@@ -124,7 +124,7 @@ namespace HM.MiniGames.Minesweeper {
         private GameMain() {
 
         }
-        private LayoutHelper<BlockType> _layoutHelper = LayoutHelper<BlockType>.Create(0, 0, BlockType.None);
+        private Layout<BlockType> _layoutHelper = Layout<BlockType>.Create(0, 0, BlockType.None);
         private IBlockGenerator _blockGenerator = new NoBlockGenerator();
         private int CountNearby(Coordinate coord, Predicate<IBlock> predicate) {
             int count = 0;
