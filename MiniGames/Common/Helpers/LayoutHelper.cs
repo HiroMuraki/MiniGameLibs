@@ -12,7 +12,7 @@ namespace HM.MiniGames {
             }
             return result;
         }
-        internal static T[,] CreateLayoutFromArray<T>(T[] array, int rowSize, int columnSize) {
+        internal static T[,] Create2DArraysFromArray<T>(T[] array, int rowSize, int columnSize) {
             if (array.Length != rowSize * columnSize) {
                 throw new ArgumentException($"size of origin array not equals rowSize * columnSize");
             }
@@ -47,18 +47,15 @@ namespace HM.MiniGames {
             }
             return count;
         }
-        internal static Coordinate[] GetCoordinates<T>(T[,] layout) {
+        internal static IEnumerable<Coordinate> GetCoordinates<T>(T[,] layout) {
             int rowSize = layout.GetLength(0);
             int columnSize = layout.GetLength(1);
 
-            var coords = new Coordinate[rowSize * columnSize];
             for (int x = 0; x < columnSize; x++) {
                 for (int y = 0; y < rowSize; y++) {
-                    coords[x * columnSize + y] = new Coordinate(x, y);
+                    yield return new Coordinate(x, y);
                 }
             }
-
-            return coords;
         }
         internal static bool TryFindCoordinates<T>(T[,] layout, Predicate<T> predicate, out Coordinate[] result) {
             result = (from i in GetCoordinates(layout)
@@ -189,7 +186,7 @@ namespace HM.MiniGames {
             Coordinate[] allowedCoords;
             // 选择可进行随机化的坐标组
             if (fixedCoordinates.Length == 0) {
-                allowedCoords = GetCoordinates(layout);
+                allowedCoords = GetCoordinates(layout).ToArray();
             }
             else {
                 allowedCoords = (from i in GetCoordinates(layout)

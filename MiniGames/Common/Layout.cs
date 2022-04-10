@@ -137,7 +137,7 @@ namespace HM.MiniGames {
             return new Layout<T>(layout);
         }
         public static Layout<T> Create(T[] array, int rowSize, int columnSize) {
-            return new(LayoutHelper.CreateLayoutFromArray(array, rowSize, columnSize));
+            return new(LayoutHelper.Create2DArraysFromArray(array, rowSize, columnSize));
         }
         #endregion
 
