@@ -1,4 +1,6 @@
-﻿namespace HM.MiniGames {
+﻿using System.Text;
+
+namespace HM.MiniGames {
     internal static class LayoutHelper {
         internal static T[] ToArray<T>(T[,] layout) {
             var result = new T[layout.Length];
@@ -122,6 +124,56 @@
         }
         internal static bool IsValidCoordinate<T>(T[,] layout, Coordinate coord) {
             return !(coord.X < 0 || coord.X >= layout.GetLength(1) || coord.Y < 0 || coord.Y >= layout.GetLength(0));
+        }
+        internal static string Format2DArrays<T>(this T[,] layout, string? format) {
+            string lArgs = format?.ToLower() ?? "";
+            bool align = lArgs.Contains('a');
+            bool matrixStyle = lArgs.Contains('m');
+            int rowSize = layout.GetLength(0);
+            int columnSize = layout.GetLength(1);
+
+            int maxCellLen = -1;
+            foreach (var item in layout) {
+                int sLen = item?.ToString()?.Length ?? 0;
+                if (sLen > maxCellLen) {
+                    maxCellLen = sLen;
+                }
+            }
+
+            var sb = new StringBuilder();
+            if (matrixStyle) {
+                for (int y = 0; y < rowSize; y++) {
+                    sb.Append(CreateRow(y));
+                    if (y < rowSize - 1) {
+                        sb.AppendLine();
+                    }
+                }
+            }
+            else {
+                for (int y = rowSize - 1; y >= 0; y--) {
+                    sb.Append(CreateRow(y));
+                    if (y > 0) {
+                        sb.AppendLine();
+                    }
+                }
+            }
+
+            return sb.ToString();
+
+            string CreateRow(int y) {
+                var sb = new StringBuilder();
+                for (int x = 0; x < columnSize; x++) {
+                    string cell = layout[y, x]?.ToString() ?? "";
+                    if (align && cell.Length < maxCellLen) {
+                        cell += new string(' ', maxCellLen - cell.Length);
+                    }
+                    if (x < columnSize - 1) {
+                        cell += ' ';
+                    }
+                    sb.Append(cell);
+                }
+                return sb.ToString();
+            }
         }
 
         private static readonly List<Coordinate> _aroundDelta = new() {

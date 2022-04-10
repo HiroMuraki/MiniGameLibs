@@ -2,7 +2,7 @@
 
 namespace HM.MiniGames {
     public sealed class Layout<T>
-        : IEquatable<Layout<T>>
+        : IEquatable<Layout<T>>, IFormattable
         where T : notnull {
         #region Properties
         public T this[int x, int y] {
@@ -82,6 +82,9 @@ namespace HM.MiniGames {
             }
 
             return sb.ToString();
+        }
+        public string ToString(string? format, IFormatProvider? formatProvider) {
+            return LayoutHelper.Format2DArrays(_layout, format);
         }
         public override int GetHashCode() {
             return RowSize ^ ColumnSize;
