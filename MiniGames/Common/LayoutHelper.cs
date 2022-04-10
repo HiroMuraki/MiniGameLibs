@@ -172,7 +172,7 @@ namespace HM.MiniGames {
             RandomAssign(layout, values, Array.Empty<Coordinate>());
         }
         public static void RandomAssign<T>(T[,] layout, T[] values, Coordinate[] fixedCoords) where T : notnull {
-            if (fixedCoords.Length < values.Length) {
+            if (layout.Length - fixedCoords.Length < values.Length) {
                 throw new ArgumentException($"Values size({values.Length}) could not be larger than target coords size({fixedCoords.Length})");
             }
 
@@ -193,7 +193,7 @@ namespace HM.MiniGames {
             RandomAssign(layout, value, count, Array.Empty<Coordinate>());
         }
         public static void RandomAssign<T>(T[,] layout, T value, int count, Coordinate[] fixedCoords) where T : notnull {
-            if (fixedCoords.Length < count) {
+            if (layout.Length - fixedCoords.Length < count) {
                 throw new ArgumentException($"Values size({count}) could not be larger than target coords size({fixedCoords.Length})");
             }
 
