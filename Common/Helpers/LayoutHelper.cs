@@ -180,6 +180,10 @@ namespace HM.MiniGames {
             Fill(layout, values, Array.Empty<Coordinate>());
         }
         internal static void Fill<T>(T[,] layout, T[] values, Coordinate[] ignoredCoords) {
+            if (layout.Length == 0 || values.Length == 0) {
+                return;
+            }
+
             var allowedCoords = (from coord in GetCoordinates(layout)
                                  where !ignoredCoords.Contains(coord)
                                  select coord).ToArray();
@@ -193,6 +197,10 @@ namespace HM.MiniGames {
             Fill(layout, value, count, Array.Empty<Coordinate>());
         }
         internal static void Fill<T>(T[,] layout, T value, int count, Coordinate[] ignoredCoords) {
+            if (layout.Length == 0 || count == 0) {
+                return;
+            }
+
             var allowedCoords = (from coord in GetCoordinates(layout)
                                  where !ignoredCoords.Contains(coord)
                                  select coord).ToArray();
@@ -209,6 +217,9 @@ namespace HM.MiniGames {
         internal static void RandomFill<T>(T[,] layout, T[] values, Coordinate[] fixedCoords) {
             if (layout.Length - fixedCoords.Length < values.Length) {
                 throw new ArgumentException($"Values size({values.Length}) could not be larger than target coords size({fixedCoords.Length})");
+            }
+            if (layout.Length == 0 || values.Length == 0) {
+                return;
             }
 
             var rnd = new Random();
@@ -230,6 +241,9 @@ namespace HM.MiniGames {
         internal static void RandomFill<T>(T[,] layout, T value, int count, Coordinate[] fixedCoords) {
             if (layout.Length - fixedCoords.Length < count) {
                 throw new ArgumentException($"Values size({count}) could not be larger than target coords size({fixedCoords.Length})");
+            }
+            if (layout.Length == 0 || count == 0) {
+                return;
             }
 
             var rnd = new Random();
