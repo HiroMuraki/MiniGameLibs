@@ -1,5 +1,5 @@
-﻿namespace HM.MiniGames.Minesweeper {
-    public enum GameStage {
+﻿namespace HM.MiniGames.Minesweeper.test {
+    public enum _GameStatus {
         Prepared = 0,
         Started = 1,
         Playing = 2,

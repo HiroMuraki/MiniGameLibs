@@ -26,7 +26,7 @@ namespace HM.MiniGames.Minesweeper {
                 Blocks[coord] = _blockGenerator.Create();
                 Blocks[coord].Coordinate = coord;
             }
-            OnGameStageChanged(GameStage.Prepared);
+            OnGameStageChanged(GameStatus.Prepared);
             return this;
         }
         public GameMain Start(GameStartInfo gameInfo) {
@@ -36,11 +36,11 @@ namespace HM.MiniGames.Minesweeper {
             _layoutHelper.RandomFill(BlockType.Mine, MineCount, fixedCoords.ToArray());
             UpdateLayout();
             OnLayoutUpdated();
-            OnGameStageChanged(GameStage.Started);
+            OnGameStageChanged(GameStatus.Started);
             return this;
         }
         public GameMain Pause() {
-            OnGameStageChanged(GameStage.Paused);
+            OnGameStageChanged(GameStatus.Paused);
             return this;
         }
         public GameMain RestartGame() {
@@ -153,7 +153,7 @@ namespace HM.MiniGames.Minesweeper {
         private void OnBlockActed(Coordinate coord, BlockAction action) {
             BlockActed?.Invoke(this, new BlockActedEventArgs(Blocks[coord], action, coord));
         }
-        private void OnGameStageChanged(GameStage stage) {
+        private void OnGameStageChanged(GameStatus stage) {
             GameStageChanged?.Invoke(this, new GameStageChangedEventArgs(stage));
         }
         #endregion
