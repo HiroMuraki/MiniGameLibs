@@ -1,4 +1,4 @@
-﻿namespace HM.MiniGames.LLK {
+﻿namespace HM.MiniGames.LinkGame {
     public enum TokenStatus {
         None,
         Selected,

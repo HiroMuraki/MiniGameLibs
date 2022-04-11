@@ -1,4 +1,4 @@
-﻿namespace HM.MiniGames.LLK {
+﻿namespace HM.MiniGames.LinkGame {
     public interface ITokenGenerator {
         IToken Create();
     }

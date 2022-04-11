@@ -1,9 +1,9 @@
 ﻿using System.Text;
+using System.Collections;
 
 namespace HM.MiniGames {
     public sealed class Layout<T>
-        : IEquatable<Layout<T>>, IFormattable
-        where T : notnull {
+        : IEquatable<Layout<T>>, IEnumerable<T>, IEnumerable, IFormattable {
         #region Properties
         public T this[int x, int y] {
             get {
@@ -153,12 +153,20 @@ namespace HM.MiniGames {
             }
             for (int y = 0; y < RowSize; y++) {
                 for (int x = 0; x < ColumnSize; x++) {
-                    if (!_layout[y, x].Equals(other._layout[y, x])) {
+                    if (Equals(_layout[y, x], other._layout[y, x])) {
                         return false;
                     }
                 }
             }
             return true;
+        }
+        public IEnumerator<T> GetEnumerator() {
+            foreach (var coord in Coordinates) {
+                yield return _layout[coord.Y, coord.X];
+            }
+        }
+        IEnumerator IEnumerable.GetEnumerator() {
+            return GetEnumerator();
         }
         #endregion
 

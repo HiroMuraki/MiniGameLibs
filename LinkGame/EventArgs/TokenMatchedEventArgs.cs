@@ -1,4 +1,4 @@
-﻿namespace HM.MiniGames.LLK {
+﻿namespace HM.MiniGames.LinkGame {
     public class TokenMatchedEventArgs : EventArgs {
         public IToken A { get; }
         public IToken B { get; }

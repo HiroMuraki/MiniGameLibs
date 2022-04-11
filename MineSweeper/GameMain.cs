@@ -1,9 +1,10 @@
 namespace HM.MiniGames.Minesweeper {
+
     public sealed class GameMain {
         #region Events
         public event EventHandler<LayoutUpdatedEventArgs>? LayoutUpdated;
         public event EventHandler<BlockActedEventArgs>? BlockActed;
-        public event EventHandler<GameStageChangedEventArgs>? GameStageChanged;
+        public event EventHandler<GameStatusChangedEventArgs>? GameStageChanged;
         #endregion
 
         #region Properties
@@ -26,7 +27,8 @@ namespace HM.MiniGames.Minesweeper {
                 Blocks[coord] = _blockGenerator.Create();
                 Blocks[coord].Coordinate = coord;
             }
-            OnGameStageChanged(GameStatus.Prepared);
+            _gameHelper = new MinesweeperHelper(Blocks);
+            OnGameStatusChanged(GameStatus.Prepared);
             return this;
         }
         public GameMain Start(GameStartInfo gameInfo) {
@@ -36,11 +38,11 @@ namespace HM.MiniGames.Minesweeper {
             _layoutHelper.RandomFill(BlockType.Mine, MineCount, fixedCoords.ToArray());
             UpdateLayout();
             OnLayoutUpdated();
-            OnGameStageChanged(GameStatus.Started);
+            OnGameStatusChanged(GameStatus.Started);
             return this;
         }
         public GameMain Pause() {
-            OnGameStageChanged(GameStatus.Paused);
+            OnGameStatusChanged(GameStatus.Paused);
             return this;
         }
         public GameMain RestartGame() {
@@ -51,7 +53,7 @@ namespace HM.MiniGames.Minesweeper {
         }
         public GameMain Open(Coordinate coord) {
             // 打开本块
-            CheckCoordinate(coord);
+            _gameHelper.CheckCoordinate(coord);
             if (Blocks[coord].IsOpen || Blocks[coord].IsFlagged) {
                 return this;
             }
@@ -60,23 +62,11 @@ namespace HM.MiniGames.Minesweeper {
             return this;
         }
         public GameMain OpenRecursively(Coordinate coord) {
-            Open(coord);
-            // 如果当前块周围有雷并且周围的标记数量小于周围雷数，跳过
-            if (Blocks[coord].NearbyMines > 0 && CountNearby(coord, b => b.IsFlagged) < Blocks[coord].NearbyMines) {
-                return this;
-            }
-            // 周围无雷，递归打开周围的方格
-            foreach (var aCoord in _layoutHelper.GetAroundCoordinates(coord)) {
-                // 跳过已开或标记的方格
-                if (Blocks[aCoord].IsOpen || Blocks[aCoord].IsFlagged) {
-                    continue;
-                }
-                OpenRecursively(aCoord);
-            }
+            _gameHelper.OpenRecursively(coord, (c) => Open(c), out _);
             return this;
         }
         public GameMain Close(Coordinate coord) {
-            CheckCoordinate(coord);
+            _gameHelper.CheckCoordinate(coord);
             if (!Blocks[coord].IsOpen) {
                 return this;
             }
@@ -85,7 +75,7 @@ namespace HM.MiniGames.Minesweeper {
             return this;
         }
         public GameMain Flag(Coordinate coord) {
-            CheckCoordinate(coord);
+            _gameHelper.CheckCoordinate(coord);
             if (Blocks[coord].IsFlagged || Blocks[coord].IsOpen) {
                 return this;
             }
@@ -94,7 +84,7 @@ namespace HM.MiniGames.Minesweeper {
             return this;
         }
         public GameMain Unflag(Coordinate coord) {
-            CheckCoordinate(coord);
+            _gameHelper.CheckCoordinate(coord);
             if (!Blocks[coord].IsFlagged) {
                 return this;
             }
@@ -103,48 +93,28 @@ namespace HM.MiniGames.Minesweeper {
             return this;
         }
         public bool IsGameCompleted() {
-            foreach (var block in Blocks) {
-                if (block.Type == BlockType.Blank && !block.IsOpen) {
-                    return false;
-                }
-            }
-            return true;
+            return _gameHelper.IsGameCompleted();
         }
         #endregion
 
         public static GameMain Create(IBlockGenerator generator) {
-            return new GameMain() {
-                _blockGenerator = generator
-            };
+            return new GameMain(generator);
         }
 
         #region Helper
-        private GameMain() {
-
+        private GameMain(IBlockGenerator generator) {
+            _blockGenerator = generator;
         }
         private Layout<BlockType> _layoutHelper = Layout<BlockType>.Create(0, 0, BlockType.None);
-        private IBlockGenerator _blockGenerator = new NoBlockGenerator();
-        private int CountNearby(Coordinate coord, Predicate<IBlock> predicate) {
-            int count = 0;
-            foreach (var aCoord in _layoutHelper.GetAroundCoordinates(coord)) {
-                if (predicate(Blocks[aCoord])) {
-                    count++;
-                }
-            }
-            return count;
-        }
+        private MinesweeperHelper _gameHelper = new(Grid<IBlock>.Create(0, 0));
+        private readonly IBlockGenerator _blockGenerator = new NoBlockGenerator();
         private void UpdateLayout() {
             foreach (var coord in _layoutHelper.Coordinates) {
                 Blocks[coord].Type = _layoutHelper[coord];
             }
 
             foreach (var coord in _layoutHelper.Coordinates) {
-                Blocks[coord].NearbyMines = CountNearby(coord, c => c.Type == BlockType.Mine);
-            }
-        }
-        private void CheckCoordinate(Coordinate coord) {
-            if (coord.X < 0 || coord.X >= _layoutHelper.ColumnSize || coord.Y < 0 || coord.Y >= _layoutHelper.RowSize) {
-                throw new CoordinateOutOfRangeException(coord);
+                Blocks[coord].NearbyMines = _gameHelper.CountNearby(coord, c => c.Type == BlockType.Mine);
             }
         }
         private void OnLayoutUpdated() {
@@ -153,8 +123,8 @@ namespace HM.MiniGames.Minesweeper {
         private void OnBlockActed(Coordinate coord, BlockAction action) {
             BlockActed?.Invoke(this, new BlockActedEventArgs(Blocks[coord], action, coord));
         }
-        private void OnGameStageChanged(GameStatus stage) {
-            GameStageChanged?.Invoke(this, new GameStageChangedEventArgs(stage));
+        private void OnGameStatusChanged(GameStatus stage) {
+            GameStageChanged?.Invoke(this, new GameStatusChangedEventArgs(stage));
         }
         #endregion
     }

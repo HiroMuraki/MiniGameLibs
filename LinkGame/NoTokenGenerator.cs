@@ -1,4 +1,4 @@
-﻿namespace HM.MiniGames.LLK {
+﻿namespace HM.MiniGames.LinkGame {
     public class NoTokenGenerator : ITokenGenerator {
         public IToken Create() {
             throw new InvalidOperationException();

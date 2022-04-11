@@ -1,8 +1,8 @@
 ﻿namespace HM.MiniGames.Minesweeper {
-    public class GameStageChangedEventArgs : EventArgs {
+    public class GameStatusChangedEventArgs : EventArgs {
         public GameStatus Stage { get; private set; }
 
-        public GameStageChangedEventArgs(GameStatus stage) {
+        public GameStatusChangedEventArgs(GameStatus stage) {
             Stage = stage;
         }
     }

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace HM.MiniGames.Minesweeper {
+namespace HM.MiniGames {
     [Serializable]
     public class CoordinateOutOfRangeException : Exception {
         public Coordinate Coordinate { get; }

@@ -1,10 +1,51 @@
 ﻿using HM.MiniGames;
 
-namespace HM.MiniGames.LLK {
-    internal class LLKHelper {
-        internal Layout<NodeType> Layout { get; }
+namespace HM.MiniGames.LinkGame {
+    public class LLKHelper {
+        public Layout<IToken> Layout { get; }
 
-        internal bool TryConnect(Coordinate start, Coordinate target, out Coordinate[] nodes) {
+        public bool TryConnect(Coordinate start, Coordinate target, out Coordinate[] nodes) {
+            var nodeLayout = Grid<NodeType>.Create(Layout.RowSize, Layout.ColumnSize);
+            foreach (var coord in Layout.Coordinates) {
+                nodeLayout[coord] = Layout[coord].Status switch {
+                    TokenStatus.Idle => NodeType.Block,
+                    TokenStatus.None => NodeType.Road,
+                    TokenStatus.Matched => NodeType.Road,
+                    _ => NodeType.Road
+                };
+            }
+            return TryConnectCore(nodeLayout, start, target, out nodes);
+        }
+        public bool TryMatch(Coordinate start, Coordinate target) {
+            return TryMatchCore(start, target);
+        }
+        public void CheckCoordinate(Coordinate coord) {
+            if (!Layout.IsValidCoordinate(coord)) {
+                throw new CoordinateOutOfRangeException(coord);
+            }
+        }
+        public bool IsGameCompleted() {
+            foreach (var token in Layout) {
+                if (token.Status == TokenStatus.Idle) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public LLKHelper(Layout<IToken> layout) {
+            _cachedCoords = layout.Coordinates.ToArray();
+            Layout = layout;
+        }
+        public LLKHelper(Grid<IToken> layout) {
+            _cachedCoords = layout.Coordinates.ToArray();
+            Layout = Layout<IToken>.Create(layout.RowSize, layout.ColumnSize);
+            foreach (var coord in _cachedCoords) {
+                Layout[coord] = layout[coord];
+            }
+        }
+        private readonly Coordinate[] _cachedCoords;
+        private bool TryConnectCore(Grid<NodeType> layout, Coordinate start, Coordinate target, out Coordinate[] nodes) {
             CheckCoordinate(start);
             CheckCoordinate(target);
 
@@ -37,7 +78,7 @@ namespace HM.MiniGames.LLK {
                 if (start.Y < target.Y) {
                     var testCoord = start.Up;
                     while (testCoord.Y < target.Y) {
-                        if (Layout[testCoord] != NodeType.Road) {
+                        if (layout[testCoord] != NodeType.Road) {
                             return false;
                         }
                         testCoord = testCoord.Up;
@@ -46,7 +87,7 @@ namespace HM.MiniGames.LLK {
                 else {
                     var testCoord = start.Down;
                     while (testCoord.Y > target.Y) {
-                        if (Layout[testCoord] != NodeType.Road) {
+                        if (layout[testCoord] != NodeType.Road) {
                             return false;
                         }
                         testCoord = testCoord.Down;
@@ -66,7 +107,7 @@ namespace HM.MiniGames.LLK {
                 if (start.X < target.X) {
                     var testCoord = start.Right;
                     while (testCoord.X < target.X) {
-                        if (Layout[testCoord] != NodeType.Road) {
+                        if (layout[testCoord] != NodeType.Road) {
                             return false;
                         }
                         testCoord = testCoord.Right;
@@ -75,7 +116,7 @@ namespace HM.MiniGames.LLK {
                 else {
                     var testCoord = start.Left;
                     while (testCoord.X > target.X) {
-                        if (Layout[testCoord] != NodeType.Road) {
+                        if (layout[testCoord] != NodeType.Road) {
                             return false;
                         }
                         testCoord = testCoord.Left;
@@ -101,11 +142,11 @@ namespace HM.MiniGames.LLK {
                 // 第二交点：横轴坐标为目标点横轴坐标，纵轴坐标为起点点纵轴坐标
                 var cross2 = new Coordinate(target.X, start.Y);
                 // 测试第一交点连通性：检查起点与交点的纵向连通性+交点与目标点的横向连通性
-                if (Layout[cross1] == NodeType.Road && IsVLinked(start, cross1) && IsHLinked(cross1, target)) {
+                if (layout[cross1] == NodeType.Road && IsVLinked(start, cross1) && IsHLinked(cross1, target)) {
                     nodes = new Coordinate[] { start, cross1, target };
                 }
                 // 测试第二交点连通性：检查起点与交点的横向连通性+交点与目标点的纵向连通性
-                else if (Layout[cross2] == NodeType.Road && IsHLinked(start, cross2) && IsVLinked(cross2, target)) {
+                else if (layout[cross2] == NodeType.Road && IsHLinked(start, cross2) && IsVLinked(cross2, target)) {
                     nodes = new Coordinate[] { start, cross2, target };
                 }
                 else {
@@ -119,7 +160,7 @@ namespace HM.MiniGames.LLK {
                 float minDist = -1;
                 nodes = Array.Empty<Coordinate>();
                 foreach (var coord in _cachedCoords) {
-                    if (Layout[coord] != NodeType.Road) {
+                    if (layout[coord] != NodeType.Road) {
                         continue;
                     }
 
@@ -140,25 +181,10 @@ namespace HM.MiniGames.LLK {
                 return nodes.Length != 0;
             }
         }
-        internal bool TryMatch(Coordinate start, Coordinate target) {
+        private bool TryMatchCore(Coordinate start, Coordinate target) {
             CheckCoordinate(start);
             CheckCoordinate(target);
-            return Layout[start] == Layout[target];
-        }
-
-        internal static LLKHelper Create(int rowSize, int columnSize) {
-            return new(rowSize, columnSize);
-        }
-
-        private LLKHelper(int rowSize, int columnSize) {
-            Layout = Layout<NodeType>.Create(rowSize, columnSize);
-            _cachedCoords = Layout.Coordinates.ToArray();
-        }
-        private readonly Coordinate[] _cachedCoords;
-        private void CheckCoordinate(Coordinate coord) {
-            if (!Layout.IsValidCoordinate(coord)) {
-                throw new ArgumentException($"{coord} is out of range");
-            }
+            return Layout[start].ContentID == Layout[target].ContentID;
         }
     }
 }

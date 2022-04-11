@@ -1,4 +1,4 @@
-﻿namespace HM.MiniGames.LLK {
+﻿namespace HM.MiniGames.LinkGame {
     public class GameMain {
         class NoToken : IToken {
             public int ContentID { get; set; } = 0;
@@ -26,7 +26,6 @@
 
             var rnd = new Random();
 
-            _llkHelper = LLKHelper.Create(rowSize, columnSize);
             _contentIDLayout = Layout<int>.Create(rowSize, columnSize);
             while (_contentIDLayout.CountIf(c => c == 0) != 0) {
                 int contentID = contentIDs[rnd.Next(0, contentIDs.Length)];
@@ -34,7 +33,15 @@
                 _contentIDLayout.RandomFill(contentID, 2, fixedCoords);
             }
 
-            UpdateLayout();
+            Tokens = Grid<IToken>.Create(RowSize, ColumnSize);
+            foreach (var coord in _contentIDLayout.Coordinates) {
+                Tokens[coord] = _tokenGenerator.Create();
+                Tokens[coord].Status = TokenStatus.Idle;
+                Tokens[coord].Coordinate = coord;
+                Tokens[coord].ContentID = _contentIDLayout[coord];
+            }
+            _llkHelper = new LLKHelper(Tokens);
+
             OnGameStatusChanged(GameStatus.Prepared);
         }
         public void Start() {
@@ -44,7 +51,7 @@
             OnGameStatusChanged(GameStatus.Paused);
         }
         public void SelectToken(Coordinate coord) {
-            CheckCoordinate(coord);
+            _llkHelper.CheckCoordinate(coord);
 
             if (Tokens[coord].Status != TokenStatus.Idle) {
                 return;
@@ -57,8 +64,8 @@
                 return;
             }
             else {
-                if (TryConnect(_heldToken.Coordinate, coord, out var nodes)) {
-                    if (TryMatch(_heldToken.Coordinate, coord)) {
+                if (_llkHelper.TryConnect(_heldToken.Coordinate, coord, out var nodes)) {
+                    if (_llkHelper.TryMatch(_heldToken.Coordinate, coord)) {
                         _heldToken.Status = TokenStatus.Matched;
                         Tokens[coord].Status = TokenStatus.Matched;
                         OnTokenMatched(_heldToken, Tokens[coord], nodes);
@@ -73,12 +80,7 @@
             }
         }
         public bool IsGameCompleted() {
-            foreach (var token in Tokens) {
-                if (token.Status == TokenStatus.Idle) {
-                    return false;
-                }
-            }
-            return true;
+            return _llkHelper.IsGameCompleted();
         }
         #endregion
 
@@ -90,38 +92,10 @@
             _tokenGenerator = tokenGenerator;
         }
         private static readonly IToken _noToken = new NoToken();
+        private readonly ITokenGenerator _tokenGenerator = new NoTokenGenerator();
         private Layout<int> _contentIDLayout = Layout<int>.Create(0, 0);
-        private LLKHelper _llkHelper = LLKHelper.Create(0, 0);
-        private ITokenGenerator _tokenGenerator = new NoTokenGenerator();
+        private LLKHelper _llkHelper = new LLKHelper(Grid<IToken>.Create(0, 0));
         private IToken _heldToken = _noToken;
-        private void UpdateLayout() {
-            Tokens = Grid<IToken>.Create(RowSize, ColumnSize);
-            foreach (var coord in _contentIDLayout.Coordinates) {
-                Tokens[coord] = _tokenGenerator.Create();
-                Tokens[coord].Status = TokenStatus.Idle;
-                Tokens[coord].Coordinate = coord;
-                Tokens[coord].ContentID = _contentIDLayout[coord];
-            }
-        }
-        private bool TryConnect(Coordinate start, Coordinate target, out Coordinate[] nodes) {
-            foreach (var coord in _llkHelper.Layout.Coordinates) {
-                _llkHelper.Layout[coord] = Tokens[coord].Status switch {
-                    TokenStatus.Idle => NodeType.Block,
-                    TokenStatus.None => NodeType.Road,
-                    TokenStatus.Matched => NodeType.Road,
-                    _ => NodeType.Road
-                };
-            }
-            return _llkHelper.TryConnect(start, target, out nodes);
-        }
-        private bool TryMatch(Coordinate start, Coordinate target) {
-            return Tokens[start].ContentID == Tokens[target].ContentID;
-        }
-        private void CheckCoordinate(Coordinate coord) {
-            if (!_contentIDLayout.IsValidCoordinate(coord)) {
-                throw new ArgumentException();
-            };
-        }
         private void OnTokenMatched(IToken a, IToken b, Coordinate[] nodes) {
             TokenMatched?.Invoke(this, new TokenMatchedEventArgs(a, b, nodes));
         }
