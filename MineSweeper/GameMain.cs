@@ -33,7 +33,7 @@ namespace HM.MiniGames.Minesweeper {
             var fixedCoords = new List<Coordinate>();
             fixedCoords.Add(gameInfo.StartCoordinate);
             fixedCoords.AddRange(_layoutHelper.GetAroundCoordinates(gameInfo.StartCoordinate));
-            _layoutHelper.RandomAssign(BlockType.Mine, MineCount, fixedCoords.ToArray());
+            _layoutHelper.RandomFill(BlockType.Mine, MineCount, fixedCoords.ToArray());
             UpdateLayout();
             OnLayoutUpdated();
             OnGameStageChanged(GameStage.Started);

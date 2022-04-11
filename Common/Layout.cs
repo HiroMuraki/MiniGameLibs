@@ -23,6 +23,7 @@ namespace HM.MiniGames {
         }
         public int RowSize => _layout.GetLength(0);
         public int ColumnSize => _layout.GetLength(1);
+        public int Count => RowSize * ColumnSize;
         public IEnumerable<Coordinate> Coordinates => LayoutHelper.GetCoordinates(_layout);
         #endregion
 
@@ -57,20 +58,36 @@ namespace HM.MiniGames {
         public Layout<T> GetDeepCopy() {
             return new(LayoutHelper.GetDeepCopy(_layout));
         }
-        public Layout<T> RandomAssign(T[] values) {
-            LayoutHelper.RandomAssign(_layout, values);
+        public Layout<T> Fill(T[] values) {
+            LayoutHelper.Fill(_layout, values);
             return this;
         }
-        public Layout<T> RandomAssign(T[] values, Coordinate[] fixedCoords) {
-            LayoutHelper.RandomAssign(_layout, values, fixedCoords);
+        public Layout<T> Fill(T[] values, Coordinate[] ignoredCoords) {
+            LayoutHelper.Fill(_layout, values, ignoredCoords);
             return this;
         }
-        public Layout<T> RandomAssign(T value, int count) {
-            LayoutHelper.RandomAssign(_layout, value, count);
+        public Layout<T> Fill(T values, int count) {
+            LayoutHelper.Fill(_layout, values, count);
             return this;
         }
-        public Layout<T> RandomAssign(T value, int count, Coordinate[] fixedCoords) {
-            LayoutHelper.RandomAssign(_layout, value, count, fixedCoords);
+        public Layout<T> Fill(T value, int count, Coordinate[] ignoredCoords) {
+            LayoutHelper.Fill(_layout, value, count, ignoredCoords);
+            return this;
+        }
+        public Layout<T> RandomFill(T[] values) {
+            LayoutHelper.RandomFill(_layout, values);
+            return this;
+        }
+        public Layout<T> RandomFill(T[] values, Coordinate[] fixedCoords) {
+            LayoutHelper.RandomFill(_layout, values, fixedCoords);
+            return this;
+        }
+        public Layout<T> RandomFill(T value, int count) {
+            LayoutHelper.RandomFill(_layout, value, count);
+            return this;
+        }
+        public Layout<T> RandomFill(T value, int count, Coordinate[] fixedCoords) {
+            LayoutHelper.RandomFill(_layout, value, count, fixedCoords);
             return this;
         }
         public Layout<T> Shuffle() {

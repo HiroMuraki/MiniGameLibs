@@ -39,6 +39,10 @@ namespace HM.MiniGames {
             return copy;
         }
         internal static T[,] Shrink<T>(T[,] layout, Directions directions, int shrinkSize) {
+            if (shrinkSize < 0) {
+                throw new ArgumentException("shrink size should be larger than zero");
+            }
+
             int newRowSize = layout.GetLength(0);
             int newColumnSize = layout.GetLength(1);
             int offsetX = 0;
@@ -74,6 +78,10 @@ namespace HM.MiniGames {
             return newMArray;
         }
         internal static T[,] Expand<T>(T[,] layout, Directions directions, int expandSize) {
+            if (expandSize < 0) {
+                throw new ArgumentException("expand size should be larger than zero");
+            }
+
             int newRowSize = layout.GetLength(0);
             int newColumnSize = layout.GetLength(1);
             int offsetX = 0;
@@ -145,8 +153,8 @@ namespace HM.MiniGames {
             int rowSize = layout.GetLength(0);
             int columnSize = layout.GetLength(1);
 
-            for (int x = 0; x < columnSize; x++) {
-                for (int y = 0; y < rowSize; y++) {
+            for (int y = 0; y < rowSize; y++) {
+                for (int x = 0; x < columnSize; x++) {
                     yield return new Coordinate(x, y);
                 }
             }
@@ -168,10 +176,37 @@ namespace HM.MiniGames {
                     where IsValidCoordinate(layout, aCoord)
                     select aCoord).ToArray();
         }
-        internal static void RandomAssign<T>(T[,] layout, T[] values) {
-            RandomAssign(layout, values, Array.Empty<Coordinate>());
+        internal static void Fill<T>(T[,] layout, T[] values) {
+            Fill(layout, values, Array.Empty<Coordinate>());
         }
-        internal static void RandomAssign<T>(T[,] layout, T[] values, Coordinate[] fixedCoords) {
+        internal static void Fill<T>(T[,] layout, T[] values, Coordinate[] ignoredCoords) {
+            var allowedCoords = (from coord in GetCoordinates(layout)
+                                 where !ignoredCoords.Contains(coord)
+                                 select coord).ToArray();
+
+            int maxCycle = allowedCoords.Length < values.Length ? allowedCoords.Length : values.Length;
+            for (int i = 0; i < maxCycle; i++) {
+                layout[allowedCoords[i].Y, allowedCoords[i].X] = values[i];
+            }
+        }
+        internal static void Fill<T>(T[,] layout, T value, int count) {
+            Fill(layout, value, count, Array.Empty<Coordinate>());
+        }
+        internal static void Fill<T>(T[,] layout, T value, int count, Coordinate[] ignoredCoords) {
+            var allowedCoords = (from coord in GetCoordinates(layout)
+                                 where !ignoredCoords.Contains(coord)
+                                 select coord).ToArray();
+
+            int maxCycle = allowedCoords.Length < count ? allowedCoords.Length : count;
+            for (int i = 0; i < maxCycle; i++) {
+                layout[allowedCoords[i].Y, allowedCoords[i].X] = value;
+
+            }
+        }
+        internal static void RandomFill<T>(T[,] layout, T[] values) {
+            RandomFill(layout, values, Array.Empty<Coordinate>());
+        }
+        internal static void RandomFill<T>(T[,] layout, T[] values, Coordinate[] fixedCoords) {
             if (layout.Length - fixedCoords.Length < values.Length) {
                 throw new ArgumentException($"Values size({values.Length}) could not be larger than target coords size({fixedCoords.Length})");
             }
@@ -189,10 +224,10 @@ namespace HM.MiniGames {
                 valList.RemoveAt(valID);
             }
         }
-        internal static void RandomAssign<T>(T[,] layout, T value, int count) {
-            RandomAssign(layout, value, count, Array.Empty<Coordinate>());
+        internal static void RandomFill<T>(T[,] layout, T value, int count) {
+            RandomFill(layout, value, count, Array.Empty<Coordinate>());
         }
-        internal static void RandomAssign<T>(T[,] layout, T value, int count, Coordinate[] fixedCoords) {
+        internal static void RandomFill<T>(T[,] layout, T value, int count, Coordinate[] fixedCoords) {
             if (layout.Length - fixedCoords.Length < count) {
                 throw new ArgumentException($"Values size({count}) could not be larger than target coords size({fixedCoords.Length})");
             }
