@@ -184,14 +184,15 @@ namespace HM.MiniGames {
                 return;
             }
 
-            var coordList = (from coord in GetCoordinates(layout)
-                             where !ignoredCoords.Contains(coord)
-                             select coord).ToArray();
+            var coordList = GetCoordinates(layout).Except(ignoredCoords).ToArray();
 
             int maxCycle = coordList.Length < values.Length ? coordList.Length : values.Length;
             for (int i = 0; i < maxCycle; i++) {
                 layout[coordList[i].Y, coordList[i].X] = values[i];
             }
+        }
+        internal static void Fill<T>(T[,] layout, T value) {
+            Fill(layout, value, layout.Length);
         }
         internal static void Fill<T>(T[,] layout, T value, int count) {
             Fill(layout, value, count, Array.Empty<Coordinate>());
@@ -201,9 +202,7 @@ namespace HM.MiniGames {
                 return;
             }
 
-            var coordList = (from coord in GetCoordinates(layout)
-                             where !ignoredCoords.Contains(coord)
-                             select coord).ToArray();
+            var coordList = GetCoordinates(layout).Except(ignoredCoords).ToArray();
 
             int maxCycle = coordList.Length < count ? coordList.Length : count;
             for (int i = 0; i < maxCycle; i++) {
@@ -223,9 +222,7 @@ namespace HM.MiniGames {
             }
 
             var rnd = new Random();
-            var coordList = (from coord in GetCoordinates(layout)
-                             where !fixedCoords.Contains(coord)
-                             select coord).ToList();
+            var coordList = GetCoordinates(layout).Except(fixedCoords).ToList();
             var valList = values.ToList();
             while (valList.Count > 0 && coordList.Count > 0) {
                 var posID = rnd.Next(0, coordList.Count);
@@ -247,9 +244,7 @@ namespace HM.MiniGames {
             }
 
             var rnd = new Random();
-            var coordList = (from coord in GetCoordinates(layout)
-                             where !fixedCoords.Contains(coord)
-                             select coord).ToList();
+            var coordList = GetCoordinates(layout).Except(fixedCoords).ToList();
             for (int i = 0; i < count; i++) {
                 int posID = rnd.Next(0, coordList.Count);
                 layout[coordList[posID].Y, coordList[posID].X] = value;
@@ -265,7 +260,7 @@ namespace HM.MiniGames {
         internal static bool IsValidCoordinate<T>(T[,] layout, Coordinate coord) {
             return !(coord.X < 0 || coord.X >= layout.GetLength(1) || coord.Y < 0 || coord.Y >= layout.GetLength(0));
         }
-        internal static string Format2DArrays<T>(this T[,] layout, string? format) {
+        internal static string Format2DArrays<T>(T[,] layout, string? format) {
             string lArgs = format?.ToLower() ?? "";
             bool align = lArgs.Contains('a');
             bool matrixStyle = lArgs.Contains('m');

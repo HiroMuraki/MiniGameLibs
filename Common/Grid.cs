@@ -6,43 +6,39 @@ namespace HM.MiniGames {
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class Grid<T> : IEnumerable<T>, IEnumerable {
+        #region Properties
         public T this[Coordinate coord] {
             get {
-                return _objects[coord.Y, coord.X];
+                return _layout[coord.Y, coord.X];
             }
             set {
                 if (_locked) {
                     throw new InvalidOperationException("Grid locked, unable to modify");
                 }
-                _objects[coord.Y, coord.X] = value;
+                _layout[coord.Y, coord.X] = value;
             }
         }
         public T this[int x, int y] {
             get {
-                return _objects[y, x];
+                return _layout[y, x];
             }
             set {
                 if (_locked) {
                     throw new InvalidOperationException("Grid locked, unable to modify");
                 }
-                _objects[y, x] = value;
+                _layout[y, x] = value;
             }
         }
         public IEnumerable<Coordinate> Coordinates {
             get {
-                for (int x = 0; x < ColumnSize; x++) {
-                    for (int y = 0; y < RowSize; y++) {
-                        yield return new Coordinate(x, y);
-                    }
-                }
+                return LayoutHelper.GetCoordinates(_layout);
             }
         }
-        public int RowSize => _objects.GetLength(0);
-        public int ColumnSize => _objects.GetLength(1);
+        public int RowSize => _layout.GetLength(0);
+        public int ColumnSize => _layout.GetLength(1);
+        #endregion
 
-        public static Grid<T> Create(int rowSize, int columnSize) {
-            return new Grid<T>(rowSize, columnSize);
-        }
+        #region Methods
         public void Lock() {
             _locked = true;
         }
@@ -52,7 +48,7 @@ namespace HM.MiniGames {
         public IEnumerable<Coordinate> FindCoordinates(Predicate<T> predicate) {
             for (int x = 0; x < ColumnSize; x++) {
                 for (int y = 0; y < RowSize; y++) {
-                    if (predicate(_objects[y, x])) {
+                    if (predicate(_layout[y, x])) {
                         yield return new Coordinate(x, y);
                     }
                 }
@@ -63,18 +59,23 @@ namespace HM.MiniGames {
             return result.Length != 0;
         }
         public IEnumerator<T> GetEnumerator() {
-            foreach (var item in _objects) {
+            foreach (var item in _layout) {
                 yield return item;
             }
         }
         IEnumerator IEnumerable.GetEnumerator() {
             return GetEnumerator();
         }
+        #endregion
+
+        public static Grid<T> Create(int rowSize, int columnSize) {
+            return new Grid<T>(rowSize, columnSize);
+        }
 
         private Grid(int rowSize, int columnSize) {
-            _objects = new T[rowSize, columnSize];
+            _layout = new T[rowSize, columnSize];
         }
-        private readonly T[,] _objects;
+        private readonly T[,] _layout;
         private bool _locked;
     }
 }

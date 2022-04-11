@@ -66,6 +66,10 @@ namespace HM.MiniGames {
             LayoutHelper.Fill(_layout, values, ignoredCoords);
             return this;
         }
+        public Layout<T> Fill(T value) {
+            LayoutHelper.Fill(_layout, value);
+            return this;
+        }
         public Layout<T> Fill(T values, int count) {
             LayoutHelper.Fill(_layout, values, count);
             return this;
