@@ -184,13 +184,13 @@ namespace HM.MiniGames {
                 return;
             }
 
-            var allowedCoords = (from coord in GetCoordinates(layout)
-                                 where !ignoredCoords.Contains(coord)
-                                 select coord).ToArray();
+            var coordList = (from coord in GetCoordinates(layout)
+                             where !ignoredCoords.Contains(coord)
+                             select coord).ToArray();
 
-            int maxCycle = allowedCoords.Length < values.Length ? allowedCoords.Length : values.Length;
+            int maxCycle = coordList.Length < values.Length ? coordList.Length : values.Length;
             for (int i = 0; i < maxCycle; i++) {
-                layout[allowedCoords[i].Y, allowedCoords[i].X] = values[i];
+                layout[coordList[i].Y, coordList[i].X] = values[i];
             }
         }
         internal static void Fill<T>(T[,] layout, T value, int count) {
@@ -201,13 +201,13 @@ namespace HM.MiniGames {
                 return;
             }
 
-            var allowedCoords = (from coord in GetCoordinates(layout)
-                                 where !ignoredCoords.Contains(coord)
-                                 select coord).ToArray();
+            var coordList = (from coord in GetCoordinates(layout)
+                             where !ignoredCoords.Contains(coord)
+                             select coord).ToArray();
 
-            int maxCycle = allowedCoords.Length < count ? allowedCoords.Length : count;
+            int maxCycle = coordList.Length < count ? coordList.Length : count;
             for (int i = 0; i < maxCycle; i++) {
-                layout[allowedCoords[i].Y, allowedCoords[i].X] = value;
+                layout[coordList[i].Y, coordList[i].X] = value;
 
             }
         }
