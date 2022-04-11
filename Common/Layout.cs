@@ -122,6 +122,9 @@ namespace HM.MiniGames {
         public string ToString(string? format, IFormatProvider? formatProvider) {
             return LayoutHelper.Format2DArrays(_layout, format);
         }
+        public string ToString(string? format) {
+            return ToString(format, null);
+        }
         public override int GetHashCode() {
             return RowSize ^ ColumnSize;
         }

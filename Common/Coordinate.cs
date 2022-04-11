@@ -100,5 +100,8 @@ namespace HM.MiniGames {
         public string ToString(string? format, IFormatProvider? formatProvider) {
             return $"({X.ToString(format, formatProvider)}, {Y.ToString(format, formatProvider)})";
         }
+        public string ToString(string? format) {
+            return ToString(format, null);
+        }
     }
 }
