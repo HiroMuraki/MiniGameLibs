@@ -11,7 +11,7 @@ namespace HM.MiniGames.Minesweeper {
         public int RowSize => _layoutHelper.RowSize;
         public int ColumnSize => _layoutHelper.ColumnSize;
         public int MineCount { get; private set; }
-        public Grid<IBlock> Blocks { get; set; } = Grid<IBlock>.Create(0, 0);
+        public Grid<IBlock> Grid { get; set; } = Grid<IBlock>.Empty;
         #endregion
 
         #region Methods
@@ -22,12 +22,12 @@ namespace HM.MiniGames.Minesweeper {
 
             MineCount = mineCount;
             _layoutHelper = Layout<BlockType>.Create(rowSize, columnSize, BlockType.Blank);
-            Blocks = Grid<IBlock>.Create(_layoutHelper.RowSize, _layoutHelper.ColumnSize);
+            Grid = Grid<IBlock>.Create(rowSize, columnSize);
             foreach (var coord in _layoutHelper.Coordinates) {
-                Blocks[coord] = _blockGenerator.Create();
-                Blocks[coord].Coordinate = coord;
+                Grid[coord] = _blockGenerator.Create();
+                Grid[coord].Coordinate = coord;
             }
-            _gameHelper = new MinesweeperHelper(Blocks);
+            _gameHelper = new MinesweeperHelper(Grid);
             OnGameStatusChanged(GameStatus.Prepared);
             return this;
         }
@@ -54,41 +54,41 @@ namespace HM.MiniGames.Minesweeper {
         public GameMain Open(Coordinate coord) {
             // ´ò¿ª±¾¿é
             _gameHelper.CheckCoordinate(coord);
-            if (Blocks[coord].IsOpen || Blocks[coord].IsFlagged) {
+            if (Grid[coord].IsOpen || Grid[coord].IsFlagged) {
                 return this;
             }
-            Blocks[coord].IsOpen = true;
+            Grid[coord].IsOpen = true;
             OnBlockActed(coord, BlockAction.Open);
             return this;
         }
-        public GameMain OpenRecursively(Coordinate coord) {
-            _gameHelper.OpenRecursively(coord, (c) => Open(c), out _);
+        public GameMain OpenRecursively(Coordinate coord, out Coordinate[] nodes) {
+            _gameHelper.OpenRecursively(coord, (c) => Open(c), out nodes);
             return this;
         }
         public GameMain Close(Coordinate coord) {
             _gameHelper.CheckCoordinate(coord);
-            if (!Blocks[coord].IsOpen) {
+            if (!Grid[coord].IsOpen) {
                 return this;
             }
-            Blocks[coord].IsOpen = false;
+            Grid[coord].IsOpen = false;
             OnBlockActed(coord, BlockAction.Close);
             return this;
         }
         public GameMain Flag(Coordinate coord) {
             _gameHelper.CheckCoordinate(coord);
-            if (Blocks[coord].IsFlagged || Blocks[coord].IsOpen) {
+            if (Grid[coord].IsFlagged || Grid[coord].IsOpen) {
                 return this;
             }
-            Blocks[coord].IsFlagged = true;
+            Grid[coord].IsFlagged = true;
             OnBlockActed(coord, BlockAction.Flagged);
             return this;
         }
         public GameMain Unflag(Coordinate coord) {
             _gameHelper.CheckCoordinate(coord);
-            if (!Blocks[coord].IsFlagged) {
+            if (!Grid[coord].IsFlagged) {
                 return this;
             }
-            Blocks[coord].IsFlagged = false;
+            Grid[coord].IsFlagged = false;
             OnBlockActed(coord, BlockAction.Unflagged);
             return this;
         }
@@ -105,23 +105,23 @@ namespace HM.MiniGames.Minesweeper {
         private GameMain(IBlockGenerator generator) {
             _blockGenerator = generator;
         }
-        private Layout<BlockType> _layoutHelper = Layout<BlockType>.Create(0, 0, BlockType.None);
-        private MinesweeperHelper _gameHelper = new(Grid<IBlock>.Create(0, 0));
+        private Layout<BlockType> _layoutHelper = Layout<BlockType>.Empty;
+        private MinesweeperHelper _gameHelper = new(Grid<IBlock>.Empty);
         private readonly IBlockGenerator _blockGenerator = new NoBlockGenerator();
         private void UpdateLayout() {
             foreach (var coord in _layoutHelper.Coordinates) {
-                Blocks[coord].Type = _layoutHelper[coord];
+                Grid[coord].Type = _layoutHelper[coord];
             }
 
             foreach (var coord in _layoutHelper.Coordinates) {
-                Blocks[coord].NearbyMines = _gameHelper.CountNearby(coord, c => c.Type == BlockType.Mine);
+                Grid[coord].NearbyMines = _gameHelper.CountNearby(coord, c => c.Type == BlockType.Mine);
             }
         }
         private void OnLayoutUpdated() {
             LayoutUpdated?.Invoke(this, new LayoutUpdatedEventArgs());
         }
         private void OnBlockActed(Coordinate coord, BlockAction action) {
-            BlockActed?.Invoke(this, new BlockActedEventArgs(Blocks[coord], action, coord));
+            BlockActed?.Invoke(this, new BlockActedEventArgs(Grid[coord], action, coord));
         }
         private void OnGameStatusChanged(GameStatus stage) {
             GameStageChanged?.Invoke(this, new GameStatusChangedEventArgs(stage));

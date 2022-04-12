@@ -7,6 +7,8 @@ namespace HM.MiniGames {
     /// <typeparam name="T"></typeparam>
     [Serializable]
     public class Grid<T> : IEnumerable<T>, IEnumerable, IEquatable<Grid<T>>, IFormattable {
+        public static readonly Grid<T> Empty = new(0, 0);
+
         #region Properties
         internal T[,] Origin2DArray { get; }
         public T this[int x, int y] {
@@ -111,7 +113,7 @@ namespace HM.MiniGames {
         #endregion
 
         public static Grid<T> Create(int rowSize, int columnSize) {
-            return new Grid<T>(rowSize, columnSize);
+            return new(rowSize, columnSize);
         }
 
         private Grid(int rowSize, int columnSize) {

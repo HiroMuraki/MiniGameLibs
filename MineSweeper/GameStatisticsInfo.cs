@@ -2,7 +2,7 @@
     /// <summary>
     /// 统计信息控制器
     /// </summary>
-    public class GameStatisticsInfo {
+    public record GameStatisticsInfo {
         public int TimeSeconds { get; private set; }
         public int Flagged { get; set; }
         public int TotalMines { get; set; }

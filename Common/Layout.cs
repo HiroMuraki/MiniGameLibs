@@ -4,21 +4,23 @@ using System.Collections;
 namespace HM.MiniGames {
     public sealed class Layout<T>
         : IEquatable<Layout<T>>, IEnumerable<T>, IEnumerable, IFormattable {
+        public static readonly Layout<T> Empty = new(0, 0, default!);
+
         #region Properties
         public T this[int x, int y] {
             get {
-                return _grid[y, x];
+                return _grid[x, y];
             }
             set {
-                _grid[y, x] = value;
+                _grid[x, y] = value;
             }
         }
         public T this[Coordinate coord] {
             get {
-                return this[coord.X, coord.Y];
+                return _grid[coord];
             }
             set {
-                this[coord.X, coord.Y] = value;
+                _grid[coord] = value;
             }
         }
         public int RowSize => _grid.RowSize;

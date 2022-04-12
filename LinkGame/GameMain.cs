@@ -14,7 +14,7 @@
         #region Properties
         public int RowSize => _contentIDLayout.RowSize;
         public int ColumnSize => _contentIDLayout.ColumnSize;
-        public Grid<IToken> Tokens { get; private set; } = Grid<IToken>.Create(0, 0);
+        public Grid<IToken> Grid { get; private set; } = Grid<IToken>.Empty;
         #endregion
 
         #region Methods    
@@ -33,14 +33,14 @@
                 _contentIDLayout.RandomFill(contentID, 2, fixedCoords);
             }
 
-            Tokens = Grid<IToken>.Create(RowSize, ColumnSize);
+            Grid = Grid<IToken>.Create(RowSize, ColumnSize);
             foreach (var coord in _contentIDLayout.Coordinates) {
-                Tokens[coord] = _tokenGenerator.Create();
-                Tokens[coord].Status = TokenStatus.Idle;
-                Tokens[coord].Coordinate = coord;
-                Tokens[coord].ContentID = _contentIDLayout[coord];
+                Grid[coord] = _tokenGenerator.Create();
+                Grid[coord].Status = TokenStatus.Idle;
+                Grid[coord].Coordinate = coord;
+                Grid[coord].ContentID = _contentIDLayout[coord];
             }
-            _llkHelper = new LinkGameHelper(Tokens);
+            _gameHelper = new LinkGameHelper(Grid);
 
             OnGameStatusChanged(GameStatus.Prepared);
         }
@@ -51,35 +51,35 @@
             OnGameStatusChanged(GameStatus.Paused);
         }
         public void SelectToken(Coordinate coord) {
-            _llkHelper.CheckCoordinate(coord);
+            _gameHelper.CheckCoordinate(coord);
 
-            if (Tokens[coord].Status != TokenStatus.Idle) {
-                return;
-            }
-            else if (ReferenceEquals(_heldToken, _noToken)) {
-                _heldToken = Tokens[coord];
-                _heldToken.Status = TokenStatus.Selected;
+            if (Grid[coord].Status == TokenStatus.Idle) {
+                if (ReferenceEquals(_heldToken, _noToken)) {
+                    _heldToken = Grid[coord];
+                    _heldToken.Status = TokenStatus.Selected;
+                }
+                else {
+                    if (_gameHelper.TryConnect(_heldToken.Coordinate, coord, out var nodes)) {
+                        if (_gameHelper.TryMatch(_heldToken.Coordinate, coord)) {
+                            _heldToken.Status = TokenStatus.Matched;
+                            Grid[coord].Status = TokenStatus.Matched;
+                            OnTokenMatched(_heldToken, Grid[coord], nodes);
+                        }
+                        else {
+                            _heldToken.Status = TokenStatus.Idle;
+                            Grid[coord].Status = TokenStatus.Idle;
+                        }
+                    }
+                    _heldToken = _noToken;
+                }
             }
             else if (_heldToken.Coordinate == coord) {
-                return;
-            }
-            else {
-                if (_llkHelper.TryConnect(_heldToken.Coordinate, coord, out var nodes)) {
-                    if (_llkHelper.TryMatch(_heldToken.Coordinate, coord)) {
-                        _heldToken.Status = TokenStatus.Matched;
-                        Tokens[coord].Status = TokenStatus.Matched;
-                        OnTokenMatched(_heldToken, Tokens[coord], nodes);
-                    }
-                    else {
-                        _heldToken.Status = TokenStatus.Idle;
-                        Tokens[coord].Status = TokenStatus.Idle;
-                    }
-                }
                 _heldToken = _noToken;
+                _heldToken.Status = TokenStatus.Idle;
             }
         }
         public bool IsGameCompleted() {
-            return _llkHelper.IsGameCompleted();
+            return _gameHelper.IsGameCompleted();
         }
         #endregion
 
@@ -92,8 +92,8 @@
         }
         private static readonly IToken _noToken = new NoToken();
         private readonly ITokenGenerator _tokenGenerator = new NoTokenGenerator();
-        private Layout<int> _contentIDLayout = Layout<int>.Create(0, 0);
-        private LinkGameHelper _llkHelper = new LinkGameHelper(Grid<IToken>.Create(0, 0));
+        private Layout<int> _contentIDLayout = Layout<int>.Empty;
+        private LinkGameHelper _gameHelper = new(Grid<IToken>.Empty);
         private IToken _heldToken = _noToken;
         private void OnTokenMatched(IToken a, IToken b, Coordinate[] nodes) {
             TokenMatched?.Invoke(this, new TokenMatchedEventArgs(a, b, nodes));

@@ -1,5 +1,5 @@
 ﻿namespace HM.MiniGames.Minesweeper {
-    public class NoBlockGenerator : IBlockGenerator {
+    internal class NoBlockGenerator : IBlockGenerator {
         public IBlock Create() {
             throw new InvalidBlockGeneratorException();
         }
