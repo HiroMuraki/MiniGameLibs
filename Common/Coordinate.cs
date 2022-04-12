@@ -89,7 +89,7 @@ namespace HM.MiniGames {
             return Equals((Coordinate)obj);
         }
         public override int GetHashCode() {
-            return X ^ Y;
+            return (X << 2) ^ Y;
         }
         public bool Equals(Coordinate other) {
             return this == other;

@@ -7,162 +7,122 @@ namespace HM.MiniGames {
         #region Properties
         public T this[int x, int y] {
             get {
-                return _layout[y, x];
+                return _grid[y, x];
             }
             set {
-                _layout[y, x] = value;
+                _grid[y, x] = value;
             }
         }
         public T this[Coordinate coord] {
             get {
-                return _layout[coord.Y, coord.X];
+                return this[coord.X, coord.Y];
             }
             set {
-                _layout[coord.Y, coord.X] = value;
+                this[coord.X, coord.Y] = value;
             }
         }
-        public int RowSize => _layout.GetLength(0);
-        public int ColumnSize => _layout.GetLength(1);
+        public int RowSize => _grid.RowSize;
+        public int ColumnSize => _grid.ColumnSize;
         public int Count => RowSize * ColumnSize;
-        public IEnumerable<Coordinate> Coordinates => LayoutHelper.GetCoordinates(_layout);
+        public IEnumerable<Coordinate> Coordinates => _grid.Coordinates;
         #endregion
 
         #region Methods
         public T[] ToArray() {
-            return LayoutHelper.ToArray(_layout);
+            return LayoutHelper.ToArray(_grid.Origin2DArray);
         }
         public T[,] To2DArray() {
-            return LayoutHelper.GetDeepCopy(_layout);
+            return LayoutHelper.GetDeepCopy(_grid.Origin2DArray);
         }
         public int CountIf(Predicate<T> predicate) {
-            return LayoutHelper.CountIf(_layout, predicate);
+            return LayoutHelper.CountIf(_grid.Origin2DArray, predicate);
         }
         public Coordinate[] FindCoordinates(Predicate<T> predicate) {
-            return LayoutHelper.FindCoordinates(_layout, predicate);
+            return LayoutHelper.FindCoordinates(_grid.Origin2DArray, predicate);
         }
         public bool TryFindCoordinates(Predicate<T> predicate, out Coordinate[] coord) {
-            return LayoutHelper.TryFindCoordinates(_layout, predicate, out coord);
+            return LayoutHelper.TryFindCoordinates(_grid.Origin2DArray, predicate, out coord);
         }
         public Coordinate[] GetAroundCoordinates(Coordinate center) {
-            return LayoutHelper.GetAroundCoordinates(_layout, center);
+            return LayoutHelper.GetAroundCoordinates(_grid.Origin2DArray, center);
         }
         public bool IsValidCoordinate(Coordinate coord) {
-            return LayoutHelper.IsValidCoordinate(_layout, coord);
+            return LayoutHelper.IsValidCoordinate(_grid.Origin2DArray, coord);
         }
         public Layout<T> GetExpandedLayout(Directions directions, int expandSize) {
-            return new(LayoutHelper.Expand(_layout, directions, expandSize));
+            return new(LayoutHelper.Expand(_grid.Origin2DArray, directions, expandSize));
         }
         public Layout<T> GetShrinkedLayout(Directions directions, int expandSize) {
-            return new(LayoutHelper.Shrink(_layout, directions, expandSize));
+            return new(LayoutHelper.Shrink(_grid.Origin2DArray, directions, expandSize));
         }
         public Layout<T> GetDeepCopy() {
-            return new(LayoutHelper.GetDeepCopy(_layout));
+            return new(LayoutHelper.GetDeepCopy(_grid.Origin2DArray));
         }
         public Layout<T> Fill(T[] values) {
-            LayoutHelper.Fill(_layout, values);
+            LayoutHelper.Fill(_grid.Origin2DArray, values);
             return this;
         }
         public Layout<T> Fill(T[] values, Coordinate[] ignoredCoords) {
-            LayoutHelper.Fill(_layout, values, ignoredCoords);
+            LayoutHelper.Fill(_grid.Origin2DArray, values, ignoredCoords);
             return this;
         }
         public Layout<T> Fill(T value) {
-            LayoutHelper.Fill(_layout, value);
+            LayoutHelper.Fill(_grid.Origin2DArray, value);
             return this;
         }
         public Layout<T> Fill(T values, int count) {
-            LayoutHelper.Fill(_layout, values, count);
+            LayoutHelper.Fill(_grid.Origin2DArray, values, count);
             return this;
         }
         public Layout<T> Fill(T value, int count, Coordinate[] ignoredCoords) {
-            LayoutHelper.Fill(_layout, value, count, ignoredCoords);
+            LayoutHelper.Fill(_grid.Origin2DArray, value, count, ignoredCoords);
             return this;
         }
         public Layout<T> RandomFill(T[] values) {
-            LayoutHelper.RandomFill(_layout, values);
+            LayoutHelper.RandomFill(_grid.Origin2DArray, values);
             return this;
         }
         public Layout<T> RandomFill(T[] values, Coordinate[] fixedCoords) {
-            LayoutHelper.RandomFill(_layout, values, fixedCoords);
+            LayoutHelper.RandomFill(_grid.Origin2DArray, values, fixedCoords);
             return this;
         }
         public Layout<T> RandomFill(T value, int count) {
-            LayoutHelper.RandomFill(_layout, value, count);
+            LayoutHelper.RandomFill(_grid.Origin2DArray, value, count);
             return this;
         }
         public Layout<T> RandomFill(T value, int count, Coordinate[] fixedCoords) {
-            LayoutHelper.RandomFill(_layout, value, count, fixedCoords);
+            LayoutHelper.RandomFill(_grid.Origin2DArray, value, count, fixedCoords);
             return this;
         }
         public Layout<T> Shuffle() {
-            LayoutHelper.Shuffle(_layout);
+            LayoutHelper.Shuffle(_grid.Origin2DArray);
             return this;
         }
         public Layout<T> Shuffle(Coordinate[] fixedCoords) {
-            LayoutHelper.Shuffle(_layout, fixedCoords);
+            LayoutHelper.Shuffle(_grid.Origin2DArray, fixedCoords);
             return this;
         }
-        public override string ToString() {
-            var sb = new StringBuilder(RowSize * ColumnSize);
-
-            for (int y = RowSize - 1; y >= 0; y--) {
-                for (int x = 0; x < ColumnSize; x++) {
-                    sb.Append(_layout[y, x]);
-                    if (x < ColumnSize - 1) {
-                        sb.Append(' ');
-                    }
-                }
-                if (y > 0) {
-                    sb.AppendLine();
-                }
-            }
-
-            return sb.ToString();
-        }
         public string ToString(string? format, IFormatProvider? formatProvider) {
-            return LayoutHelper.Format2DArrays(_layout, format);
+            return _grid.ToString(format, formatProvider);
         }
         public string ToString(string? format) {
             return ToString(format, null);
         }
+        public override string ToString() {
+            return ToString("");
+        }
         public override int GetHashCode() {
-            return RowSize ^ ColumnSize;
+            return _grid.GetHashCode();
         }
         public override bool Equals(object? obj) {
-            if (ReferenceEquals(this, obj)) {
-                return true;
-            }
-            if (obj is null) {
-                return false;
-            }
-            if (obj.GetType() != typeof(Layout<T>)) {
-                return false;
-            }
-            return Equals((Layout<T>)obj);
+            return _grid.Equals(obj);
         }
         public bool Equals(Layout<T>? other) {
-            if (ReferenceEquals(this, other)) {
-                return true;
-            }
-            if (other is null) {
-                return false;
-            }
-
-            if (RowSize != other.RowSize || ColumnSize != other.ColumnSize) {
-                return false;
-            }
-            for (int y = 0; y < RowSize; y++) {
-                for (int x = 0; x < ColumnSize; x++) {
-                    if (Equals(_layout[y, x], other._layout[y, x])) {
-                        return false;
-                    }
-                }
-            }
-            return true;
+            return _grid.Equals(other);
         }
         public IEnumerator<T> GetEnumerator() {
-            foreach (var coord in Coordinates) {
-                yield return _layout[coord.Y, coord.X];
+            foreach (var item in _grid) {
+                yield return item;
             }
         }
         IEnumerator IEnumerable.GetEnumerator() {
@@ -186,20 +146,20 @@ namespace HM.MiniGames {
         #endregion
 
         #region Helpers
-        private readonly T[,] _layout;
+        private readonly Grid<T> _grid;
         private Layout(int rowSize, int columnSize, T initValue) {
-            _layout = new T[rowSize, columnSize];
+            _grid = Grid<T>.Create(rowSize, columnSize);
             for (int y = 0; y < rowSize; y++) {
                 for (int x = 0; x < columnSize; x++) {
-                    _layout[y, x] = initValue;
+                    _grid.Origin2DArray[y, x] = initValue;
                 }
             }
         }
         private Layout(T[,] layout) {
-            _layout = new T[layout.GetLength(0), layout.GetLength(1)];
+            _grid = Grid<T>.Create(layout.GetLength(0), layout.GetLength(1));
             for (int y = 0; y < RowSize; y++) {
                 for (int x = 0; x < ColumnSize; x++) {
-                    _layout[y, x] = layout[y, x];
+                    _grid.Origin2DArray[y, x] = layout[y, x];
                 }
             }
         }

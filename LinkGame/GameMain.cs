@@ -40,7 +40,7 @@
                 Tokens[coord].Coordinate = coord;
                 Tokens[coord].ContentID = _contentIDLayout[coord];
             }
-            _llkHelper = new LLKHelper(Tokens);
+            _llkHelper = new LinkGameHelper(Tokens);
 
             OnGameStatusChanged(GameStatus.Prepared);
         }
@@ -75,7 +75,6 @@
                         Tokens[coord].Status = TokenStatus.Idle;
                     }
                 }
-                _heldToken.Status = TokenStatus.Idle;
                 _heldToken = _noToken;
             }
         }
@@ -94,7 +93,7 @@
         private static readonly IToken _noToken = new NoToken();
         private readonly ITokenGenerator _tokenGenerator = new NoTokenGenerator();
         private Layout<int> _contentIDLayout = Layout<int>.Create(0, 0);
-        private LLKHelper _llkHelper = new LLKHelper(Grid<IToken>.Create(0, 0));
+        private LinkGameHelper _llkHelper = new LinkGameHelper(Grid<IToken>.Create(0, 0));
         private IToken _heldToken = _noToken;
         private void OnTokenMatched(IToken a, IToken b, Coordinate[] nodes) {
             TokenMatched?.Invoke(this, new TokenMatchedEventArgs(a, b, nodes));

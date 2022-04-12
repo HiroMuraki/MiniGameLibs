@@ -1,7 +1,7 @@
 ﻿using HM.MiniGames;
 
 namespace HM.MiniGames.LinkGame {
-    public class LLKHelper {
+    public class LinkGameHelper {
         public Layout<IToken> Layout { get; }
 
         public bool TryConnect(Coordinate start, Coordinate target, out Coordinate[] nodes) {
@@ -14,6 +14,7 @@ namespace HM.MiniGames.LinkGame {
                     _ => NodeType.Road
                 };
             }
+
             return TryConnectCore(nodeLayout, start, target, out nodes);
         }
         public bool TryMatch(Coordinate start, Coordinate target) {
@@ -33,11 +34,11 @@ namespace HM.MiniGames.LinkGame {
             return true;
         }
 
-        public LLKHelper(Layout<IToken> layout) {
+        public LinkGameHelper(Layout<IToken> layout) {
             _cachedCoords = layout.Coordinates.ToArray();
             Layout = layout;
         }
-        public LLKHelper(Grid<IToken> layout) {
+        public LinkGameHelper(Grid<IToken> layout) {
             _cachedCoords = layout.Coordinates.ToArray();
             Layout = Layout<IToken>.Create(layout.RowSize, layout.ColumnSize);
             foreach (var coord in _cachedCoords) {
